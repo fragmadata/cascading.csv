@@ -38,9 +38,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:git@github.com:connecthq/cascading.csv.git</connection>
-    <developerConnection>scm:git:git@github.com:connecthq/cascading.csv.git</developerConnection>
-    <url>git@github.com:connecthq/cascading.csv.git</url>
+    <connection>scm:git:git@github.com:datascienceinc/cascading.csv.git</connection>
+    <developerConnection>scm:git:git@github.com:datascienceinc/cascading.csv.git</developerConnection>
+    <url>git@github.com:datascienceinc/cascading.csv.git</url>
   </scm>
 
   <repositories>
