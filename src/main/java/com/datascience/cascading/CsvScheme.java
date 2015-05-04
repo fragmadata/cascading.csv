@@ -12,10 +12,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
-import com.datascience.hadoop.CsvConf;
-import com.datascience.hadoop.CsvInputFormat;
-import com.datascience.hadoop.CsvOutputFormat;
-import com.datascience.hadoop.ListWritable;
+import com.datascience.hadoop.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -93,7 +90,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   @Override
   public void sourceConfInit(FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf) {
     conf.setInputFormat(CsvInputFormat.class);
-    configureFormat(format, conf);
+    configureReaderFormat(format, conf);
   }
 
   @Override
@@ -142,8 +139,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     conf.setOutputKeyClass(LongWritable.class);
     conf.setOutputValueClass(ListWritable.class);
     conf.setOutputFormat(CsvOutputFormat.class);
-
-    configureFormat(format, conf);
+    configureWriterFormat(format, conf);
   }
 
   @Override
@@ -157,6 +153,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   @SuppressWarnings("unchecked")
   public void sink(FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall) throws IOException {
     ListWritable<Text> record = (ListWritable<Text>) sinkCall.getContext()[1];
+    record.clear();
 
     TupleEntry entry = sinkCall.getOutgoingEntry();
     Tuple tuple = entry.getTuple();
@@ -170,20 +167,41 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Configures the Hadoop configuration for the given CSV format.
    */
-  private void configureFormat(CSVFormat format, Configuration conf) {
+  private static void configureReaderFormat(CSVFormat format, Configuration conf) {
     if (format.getHeader() != null)
-      conf.setStrings(CsvConf.CSV_COLUMNS, format.getHeader());
-    conf.set(CsvConf.CSV_DELIMITER, String.valueOf(format.getDelimiter()));
+      conf.setStrings(CsvRecordReader.CSV_READER_COLUMNS, format.getHeader());
+    conf.setBoolean(CsvRecordReader.CSV_READER_SKIP_HEADER, format.getSkipHeaderRecord());
+    conf.set(CsvRecordReader.CSV_READER_DELIMITER, String.valueOf(format.getDelimiter()));
     if (format.getRecordSeparator() != null)
-      conf.set(CsvConf.CSV_RECORD_SEPARATOR, format.getRecordSeparator());
-    conf.set(CsvConf.CSV_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
+      conf.set(CsvRecordReader.CSV_READER_RECORD_SEPARATOR, format.getRecordSeparator());
+    conf.set(CsvRecordReader.CSV_READER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
     if (format.getQuoteMode() != null)
-      conf.set(CsvConf.CSV_QUOTE_MODE, format.getQuoteMode().name());
-    conf.set(CsvConf.CSV_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
-    conf.setBoolean(CsvConf.CSV_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
-    conf.setBoolean(CsvConf.CSV_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
+      conf.set(CsvRecordReader.CSV_READER_QUOTE_MODE, format.getQuoteMode().name());
+    conf.set(CsvRecordReader.CSV_READER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
+    conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
+    conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
     if (format.getNullString() != null)
-      conf.set(CsvConf.CSV_NULL_STRING, format.getNullString());
+      conf.set(CsvRecordReader.CSV_READER_NULL_STRING, format.getNullString());
+  }
+
+  /**
+   * Configures the Hadoop configuration for the given CSV format.
+   */
+  private static void configureWriterFormat(CSVFormat format, Configuration conf) {
+    if (format.getHeader() != null)
+      conf.setStrings(CsvRecordWriter.CSV_WRITER_COLUMNS, format.getHeader());
+    conf.setBoolean(CsvRecordWriter.CSV_WRITER_SKIP_HEADER, format.getSkipHeaderRecord());
+    conf.set(CsvRecordWriter.CSV_WRITER_DELIMITER, String.valueOf(format.getDelimiter()));
+    if (format.getRecordSeparator() != null)
+      conf.set(CsvRecordWriter.CSV_WRITER_RECORD_SEPARATOR, format.getRecordSeparator());
+    conf.set(CsvRecordWriter.CSV_WRITER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
+    if (format.getQuoteMode() != null)
+      conf.set(CsvRecordWriter.CSV_WRITER_QUOTE_MODE, format.getQuoteMode().name());
+    conf.set(CsvRecordWriter.CSV_WRITER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
+    conf.setBoolean(CsvRecordWriter.CSV_WRITER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
+    conf.setBoolean(CsvRecordWriter.CSV_WRITER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
+    if (format.getNullString() != null)
+      conf.set(CsvRecordWriter.CSV_WRITER_NULL_STRING, format.getNullString());
   }
 
 }
