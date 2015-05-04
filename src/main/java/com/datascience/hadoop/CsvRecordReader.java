@@ -1,6 +1,5 @@
 package com.datascience.hadoop;
 
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.hadoop.conf.Configuration;
@@ -24,7 +23,6 @@ import java.util.Iterator;
  */
 public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<Text>> {
   private final Text[] cache = new Text[1024];
-  private final CSVFormat format;
   private final CSVParser parser;
   private final Iterator<CSVRecord> iterator;
   private final float start;
@@ -33,7 +31,6 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   private long end;
 
   public CsvRecordReader(FileSplit split, Configuration conf) throws IOException {
-    this.format = CsvConf.createFormat(conf);
     this.start = split.getStart();
     this.length = split.getLength();
     this.end = split.getStart() + split.getLength();
@@ -41,7 +38,7 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
     FileSystem fs = path.getFileSystem(conf);
     FSDataInputStream is = fs.open(path);
     Reader isr = new InputStreamReader(is);
-    parser = new CSVParser(isr, format, split.getStart(), split.getStart());
+    parser = new CSVParser(isr, CsvConf.createFormat(conf), split.getStart(), split.getStart());
     iterator = parser.iterator();
   }
 

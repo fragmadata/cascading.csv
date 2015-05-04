@@ -46,8 +46,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   }
 
   public CsvScheme(Fields sourceFields) {
-    super(sourceFields);
-    this.format = CSVFormat.DEFAULT;
+    this(sourceFields, CSVFormat.DEFAULT);
   }
 
   public CsvScheme(Fields sourceFields, CSVFormat format) {
@@ -56,8 +55,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   }
 
   public CsvScheme(Fields sourceFields, Fields sinkFields) {
-    super(sourceFields, sinkFields);
-    this.format = CSVFormat.DEFAULT;
+    this(sourceFields, sinkFields, CSVFormat.DEFAULT);
   }
 
   public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format) {
@@ -129,7 +127,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   @Override
   public Fields retrieveSinkFields(FlowProcess<JobConf> flowProcess, Tap tap) {
     Fields fields = getSinkFields();
-    if (!format.getSkipHeaderRecord() && format.getHeader().length == 0) {
+    if (!format.getSkipHeaderRecord() && (format.getHeader() == null || format.getHeader().length == 0)) {
       String[] columns = new String[fields.size()];
       for (int i = 0; i < fields.size(); i++) {
         columns[i] = fields.get(i).toString();
@@ -173,15 +171,19 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * Configures the Hadoop configuration for the given CSV format.
    */
   private void configureFormat(CSVFormat format, Configuration conf) {
-    conf.setStrings(CsvConf.CSV_COLUMNS, format.getHeader());
+    if (format.getHeader() != null)
+      conf.setStrings(CsvConf.CSV_COLUMNS, format.getHeader());
     conf.set(CsvConf.CSV_DELIMITER, String.valueOf(format.getDelimiter()));
-    conf.set(CsvConf.CSV_RECORD_SEPARATOR, format.getRecordSeparator());
+    if (format.getRecordSeparator() != null)
+      conf.set(CsvConf.CSV_RECORD_SEPARATOR, format.getRecordSeparator());
     conf.set(CsvConf.CSV_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
-    conf.set(CsvConf.CSV_QUOTE_MODE, format.getQuoteMode().name());
+    if (format.getQuoteMode() != null)
+      conf.set(CsvConf.CSV_QUOTE_MODE, format.getQuoteMode().name());
     conf.set(CsvConf.CSV_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
     conf.setBoolean(CsvConf.CSV_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
     conf.setBoolean(CsvConf.CSV_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
-    conf.set(CsvConf.CSV_NULL_STRING, format.getNullString());
+    if (format.getNullString() != null)
+      conf.set(CsvConf.CSV_NULL_STRING, format.getNullString());
   }
 
 }
