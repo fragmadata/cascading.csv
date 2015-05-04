@@ -36,7 +36,7 @@ public class CsvRecordWriter implements RecordWriter<LongWritable, ListWritable<
   public static final String DEFAULT_CSV_WRITER_RECORD_SEPARATOR = CSVFormat.DEFAULT.getRecordSeparator();
   public static final String DEFAULT_CSV_WRITER_QUOTE_CHARACTER = String.valueOf(CSVFormat.DEFAULT.getQuoteCharacter());
   public static final String DEFAULT_CSV_WRITER_QUOTE_MODE = CSVFormat.DEFAULT.getQuoteMode() != null ? CSVFormat.DEFAULT.getQuoteMode().name() : null;
-  public static final String DEFAULT_CSV_WRITER_ESCAPE_CHARACTER = String.valueOf(CSVFormat.DEFAULT.getEscapeCharacter());
+  public static final String DEFAULT_CSV_WRITER_ESCAPE_CHARACTER = null;
   public static final boolean DEFAULT_CSV_WRITER_IGNORE_EMPTY_LINES = CSVFormat.DEFAULT.getIgnoreEmptyLines();
   public static final boolean DEFAULT_CSV_WRITER_IGNORE_SURROUNDING_SPACES = CSVFormat.DEFAULT.getIgnoreSurroundingSpaces();
   public static final String DEFAULT_CSV_WRITER_NULL_STRING = CSVFormat.DEFAULT.getNullString();
@@ -63,22 +63,26 @@ public class CsvRecordWriter implements RecordWriter<LongWritable, ListWritable<
   private static CSVFormat createFormat(Configuration conf) {
     CSVFormat format = CSVFormat.newFormat(conf.get(CSV_WRITER_DELIMITER, DEFAULT_CSV_WRITER_DELIMITER).charAt(0))
       .withSkipHeaderRecord(conf.getBoolean(CSV_WRITER_SKIP_HEADER, DEFAULT_CSV_WRITER_SKIP_HEADER))
-      .withRecordSeparator(conf.get(CSV_WRITER_RECORD_SEPARATOR, DEFAULT_CSV_WRITER_RECORD_SEPARATOR).charAt(0))
-      .withQuote(conf.get(CSV_WRITER_QUOTE_CHARACTER, DEFAULT_CSV_WRITER_QUOTE_CHARACTER).charAt(0))
-      .withEscape(conf.get(CSV_WRITER_ESCAPE_CHARACTER, DEFAULT_CSV_WRITER_ESCAPE_CHARACTER).charAt(0))
+      .withRecordSeparator(conf.get(CSV_WRITER_RECORD_SEPARATOR, DEFAULT_CSV_WRITER_RECORD_SEPARATOR))
       .withIgnoreEmptyLines(conf.getBoolean(CSV_WRITER_IGNORE_EMPTY_LINES, DEFAULT_CSV_WRITER_IGNORE_EMPTY_LINES))
       .withIgnoreSurroundingSpaces(conf.getBoolean(CSV_WRITER_IGNORE_SURROUNDING_SPACES, DEFAULT_CSV_WRITER_IGNORE_SURROUNDING_SPACES))
       .withNullString(conf.get(CSV_WRITER_NULL_STRING, DEFAULT_CSV_WRITER_NULL_STRING));
 
     String[] header = conf.getStrings(CSV_WRITER_COLUMNS);
-    if (header != null && header.length > 0) {
+    if (header != null && header.length > 0)
       format = format.withHeader(header);
-    }
+
+    String escape = conf.get(CSV_WRITER_ESCAPE_CHARACTER, DEFAULT_CSV_WRITER_ESCAPE_CHARACTER);
+    if (escape != null)
+      format = format.withEscape(escape.charAt(0));
+
+    String quote = conf.get(CSV_WRITER_QUOTE_CHARACTER, DEFAULT_CSV_WRITER_QUOTE_CHARACTER);
+    if (quote != null)
+      format = format.withQuote(quote.charAt(0));
 
     String quoteMode = conf.get(CSV_WRITER_QUOTE_MODE, DEFAULT_CSV_WRITER_QUOTE_MODE);
-    if (quoteMode != null) {
+    if (quoteMode != null)
       format = format.withQuoteMode(QuoteMode.valueOf(quoteMode));
-    }
     return format;
   }
 

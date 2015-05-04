@@ -174,10 +174,12 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     conf.set(CsvRecordReader.CSV_READER_DELIMITER, String.valueOf(format.getDelimiter()));
     if (format.getRecordSeparator() != null)
       conf.set(CsvRecordReader.CSV_READER_RECORD_SEPARATOR, format.getRecordSeparator());
-    conf.set(CsvRecordReader.CSV_READER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
+    if (format.getQuoteCharacter() != null)
+      conf.set(CsvRecordReader.CSV_READER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
     if (format.getQuoteMode() != null)
       conf.set(CsvRecordReader.CSV_READER_QUOTE_MODE, format.getQuoteMode().name());
-    conf.set(CsvRecordReader.CSV_READER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
+    if (format.getEscapeCharacter() != null)
+      conf.set(CsvRecordReader.CSV_READER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
     conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
     conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
     if (format.getNullString() != null)
@@ -194,10 +196,12 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     conf.set(CsvRecordWriter.CSV_WRITER_DELIMITER, String.valueOf(format.getDelimiter()));
     if (format.getRecordSeparator() != null)
       conf.set(CsvRecordWriter.CSV_WRITER_RECORD_SEPARATOR, format.getRecordSeparator());
-    conf.set(CsvRecordWriter.CSV_WRITER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
+    if (format.getQuoteCharacter() != null)
+      conf.set(CsvRecordWriter.CSV_WRITER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
     if (format.getQuoteMode() != null)
       conf.set(CsvRecordWriter.CSV_WRITER_QUOTE_MODE, format.getQuoteMode().name());
-    conf.set(CsvRecordWriter.CSV_WRITER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
+    if (format.getEscapeCharacter() != null)
+      conf.set(CsvRecordWriter.CSV_WRITER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
     conf.setBoolean(CsvRecordWriter.CSV_WRITER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
     conf.setBoolean(CsvRecordWriter.CSV_WRITER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
     if (format.getNullString() != null)
