@@ -56,4 +56,4 @@ the first row of the source and using the first row's values as headers.
 
 ### License
 
-Copyright 2015 [DataScience, inc](http://datascience.com)
+Copyright 2015 [DataScience, Inc](http://datascience.com)
