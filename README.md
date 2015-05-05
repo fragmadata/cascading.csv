@@ -9,18 +9,18 @@ Cascading's core `TextDelimited` scheme works fine for many use cases, but when 
 with rogue delimiters, line endings, quotes, and escape characters - we often require more powerful CSV parsers to
 handle the wide variety of formats in which delimited data is written.
 
-Tresata's [OpenCSV scheme](https://github.com/tresata/cascading-opencsv) was a valiant effort to remedy these precise
-problems, but it still takes a naive approach to the problem. Specifically, the OpenCSV scheme extends Cascading's
-`TextLine` scheme, thus inhereting issues such as when line endings occur in lines that coincide with Hadoop input splits.
-In cases where a line ending appears in the same line as a Hadoop input split, existing CSV schemes will only receive
-and split partial lines, losing one complete record and gaining two partial records (the one prior to the split and the
-one after the split).
+Tresata's [OpenCSV scheme](https://github.com/tresata/cascading-opencsv) was a valiant effort to handle the types of edge
+cases often seen in CSV formatted data, but it still takes a naive approach to the problem. Specifically, the OpenCSV scheme
+extends Cascading's `TextLine` scheme, thus inhereting issues such as those resulting from the occurrence of line endings in
+lines that coincide with Hadoop input splits. In cases where a line ending appears in the same line as a Hadoop input split,
+existing CSV schemes will only receive and split partial lines, losing one complete record and gaining two partial records
+(the one prior to the split and the one after the split).
 
 ## Design
 
 Cascading.CSV uses [Apache Commons CSV](https://commons.apache.org/proper/commons-csv/) for parsing CSV inputs and writing
-CSV outputs. Commons CSV natively supports input partitioning files and therefore handles Hadoops input splits gracefully.
-In order to take advantage of input splits, this project provides a custom Hadoop
+CSV outputs. Commons CSV natively supports partitioning input files and so handles Hadoop's input splits rather gracefully.
+In order to properly support Hadoop input splits for CSV files, this project provides a custom Hadoop
 [CsvInputFormat](https://github.com/datascienceinc/cascading.csv/blob/master/src/main/java/com/datascience/hadoop/CsvInputFormat.java)
 and [CsvOutputFormat](https://github.com/datascienceinc/cascading.csv/blob/master/src/main/java/com/datascience/hadoop/CsvOutputFormat.java)
 along with an associated [RecordReader](https://github.com/datascienceinc/cascading.csv/blob/master/src/main/java/com/datascience/hadoop/CsvRecordReader.java)
@@ -41,8 +41,8 @@ CSVFormat format = CSVFormat.newFormat(',')
   .withRecordSeparator('\n');
 ```
 
-The `CSVFormat` dictates to the [Apache Commons CSV](https://commons.apache.org/proper/commons-csv/) parser how to read
-input records and write output records.
+The `CSVFormat` dictates to the CSV parser how to read input records and write output records. Refer to the
+[Commons CSV](https://commons.apache.org/proper/commons-csv/) documentation for the specific `CSVFormat` options provided.
 
 Given a `CSVFormat`, simply construct a `CsvScheme` instance.
 
