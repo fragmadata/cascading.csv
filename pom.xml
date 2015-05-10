@@ -13,7 +13,7 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>Cascading.CSV</name>
-  <url>http://github.com/connecthq/cascading.csv</url>
+  <url>http://github.com/datascienceinc/cascading.csv</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
