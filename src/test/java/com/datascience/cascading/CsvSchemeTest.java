@@ -9,6 +9,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.TupleEntryIterator;
+import com.datascience.cascading.scheme.CsvScheme;
 import junit.framework.TestCase;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.io.FileUtils;

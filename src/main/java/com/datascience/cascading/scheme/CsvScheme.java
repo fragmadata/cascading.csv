@@ -1,4 +1,4 @@
-package com.datascience.cascading;
+package com.datascience.cascading.scheme;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
