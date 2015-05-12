@@ -62,8 +62,13 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   @Override
   public Fields retrieveSourceFields(FlowProcess<JobConf> flowProcess, Tap tap) {
-    if (format.getSkipHeaderRecord() && getSourceFields().isUnknown())
-      setSourceFields(detectHeader(flowProcess, tap));
+    if (format.getSkipHeaderRecord() && format.getHeader() == null && getSourceFields().isUnknown()) {
+      setSourceFields(detectHeader(flowProcess, tap, false));
+    } else if (format.getHeader() != null) {
+      setSourceFields(new Fields(format.getHeader()));
+    } else if (getSourceFields().isSubstitution()) {
+      setSourceFields(detectHeader(flowProcess, tap, true));
+    }
     return getSourceFields();
   }
 
@@ -71,7 +76,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * Detects the header fields.
    */
   @SuppressWarnings("unchecked")
-  protected Fields detectHeader(FlowProcess<JobConf> flowProcess, Tap tap) {
+  protected Fields detectHeader(FlowProcess<JobConf> flowProcess, Tap tap, boolean genericNames) {
     Tap textLine = new Hfs(new TextLine(new Fields("line")), tap.getFullIdentifier(flowProcess.getConfigCopy()));
 
     try (TupleEntryIterator iterator = textLine.openForRead(flowProcess)) {
@@ -79,7 +84,11 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
       CSVRecord record = CSVParser.parse(line, format).iterator().next();
       String[] fields = new String[record.size()];
       for (int i = 0; i < record.size(); i++) {
-        fields[i] = record.get(i);
+        if (genericNames) {
+          fields[i] = String.format("col%d", i);
+        } else {
+          fields[i] = record.get(i);
+        }
       }
       return new Fields(fields);
     } catch (IOException e) {
