@@ -62,11 +62,11 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   @Override
   public Fields retrieveSourceFields(FlowProcess<JobConf> flowProcess, Tap tap) {
-    if (format.getSkipHeaderRecord() && format.getHeader() == null && getSourceFields().isUnknown()) {
+    if (format.getSkipHeaderRecord() && format.getHeader() == null && getSourceFields().isUnknown() || getSourceFields().isSubstitution()) {
       setSourceFields(detectHeader(flowProcess, tap, false));
     } else if (format.getHeader() != null) {
       setSourceFields(new Fields(format.getHeader()));
-    } else if (getSourceFields().isSubstitution()) {
+    } else if (getSourceFields().isUnknown() || getSourceFields().isSubstitution()) {
       setSourceFields(detectHeader(flowProcess, tap, true));
     }
     return getSourceFields();
@@ -131,19 +131,6 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   }
 
   @Override
-  public Fields retrieveSinkFields(FlowProcess<JobConf> flowProcess, Tap tap) {
-    Fields fields = getSinkFields();
-    if (!format.getSkipHeaderRecord() && (format.getHeader() == null || format.getHeader().length == 0)) {
-      String[] columns = new String[fields.size()];
-      for (int i = 0; i < fields.size(); i++) {
-        columns[i] = fields.get(i).toString();
-      }
-      format = format.withHeader(columns);
-    }
-    return fields;
-  }
-
-  @Override
   public void sinkConfInit(FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf) {
     conf.setOutputKeyClass(LongWritable.class);
     conf.setOutputValueClass(ListWritable.class);
@@ -176,21 +163,39 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Configures the Hadoop configuration for the given CSV format.
    */
-  private static void configureReaderFormat(CSVFormat format, Configuration conf) {
-    if (format.getHeader() != null)
+  private void configureReaderFormat(CSVFormat format, Configuration conf) {
+    // If the format header was explicitly provided by the user then forward it to the record reader. If skipHeaderRecord
+    // is enabled then that indicates that field names were detected. We need to ensure that headers are defined in order
+    // for the CSV reader to skip the header record.
+    if (format.getHeader() != null) {
       conf.setStrings(CsvRecordReader.CSV_READER_COLUMNS, format.getHeader());
+    } else if (format.getSkipHeaderRecord()) {
+      Fields fields = getSourceFields();
+      String[] columns = new String[fields.size()];
+      for (int i = 0; i < fields.size(); i++) {
+        columns[i] = fields.get(i).toString();
+      }
+      conf.setStrings(CsvRecordReader.CSV_READER_COLUMNS, columns);
+    }
+
     conf.setBoolean(CsvRecordReader.CSV_READER_SKIP_HEADER, format.getSkipHeaderRecord());
     conf.set(CsvRecordReader.CSV_READER_DELIMITER, String.valueOf(format.getDelimiter()));
+
     if (format.getRecordSeparator() != null)
       conf.set(CsvRecordReader.CSV_READER_RECORD_SEPARATOR, format.getRecordSeparator());
+
     if (format.getQuoteCharacter() != null)
       conf.set(CsvRecordReader.CSV_READER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
+
     if (format.getQuoteMode() != null)
       conf.set(CsvRecordReader.CSV_READER_QUOTE_MODE, format.getQuoteMode().name());
+
     if (format.getEscapeCharacter() != null)
       conf.set(CsvRecordReader.CSV_READER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
+
     conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
     conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
+
     if (format.getNullString() != null)
       conf.set(CsvRecordReader.CSV_READER_NULL_STRING, format.getNullString());
   }
@@ -198,21 +203,41 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Configures the Hadoop configuration for the given CSV format.
    */
-  private static void configureWriterFormat(CSVFormat format, Configuration conf) {
-    if (format.getHeader() != null)
-      conf.setStrings(CsvRecordWriter.CSV_WRITER_COLUMNS, format.getHeader());
+  private void configureWriterFormat(CSVFormat format, Configuration conf) {
+    // Apache CSV doesn't really handle the skipHeaderRecord flag correctly when writing output. If the skip flag is set
+    // and headers are configured, headers will always be written to the output. Since we always have headers and/or
+    // fields configured, we need to use the skipHeaderRecord flag to determine whether headers should be written.
+    if (!format.getSkipHeaderRecord()) {
+      if (format.getHeader() != null && format.getHeader().length != 0) {
+        conf.setStrings(CsvRecordWriter.CSV_WRITER_COLUMNS, format.getHeader());
+      } else {
+        Fields fields = getSinkFields();
+        String[] columns = new String[fields.size()];
+        for (int i = 0; i < fields.size(); i++) {
+          columns[i] = fields.get(i).toString();
+        }
+        conf.setStrings(CsvRecordWriter.CSV_WRITER_COLUMNS, columns);
+      }
+    }
+
     conf.setBoolean(CsvRecordWriter.CSV_WRITER_SKIP_HEADER, format.getSkipHeaderRecord());
     conf.set(CsvRecordWriter.CSV_WRITER_DELIMITER, String.valueOf(format.getDelimiter()));
+
     if (format.getRecordSeparator() != null)
       conf.set(CsvRecordWriter.CSV_WRITER_RECORD_SEPARATOR, format.getRecordSeparator());
+
     if (format.getQuoteCharacter() != null)
       conf.set(CsvRecordWriter.CSV_WRITER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
+
     if (format.getQuoteMode() != null)
       conf.set(CsvRecordWriter.CSV_WRITER_QUOTE_MODE, format.getQuoteMode().name());
+
     if (format.getEscapeCharacter() != null)
       conf.set(CsvRecordWriter.CSV_WRITER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
+
     conf.setBoolean(CsvRecordWriter.CSV_WRITER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
     conf.setBoolean(CsvRecordWriter.CSV_WRITER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
+
     if (format.getNullString() != null)
       conf.set(CsvRecordWriter.CSV_WRITER_NULL_STRING, format.getNullString());
   }

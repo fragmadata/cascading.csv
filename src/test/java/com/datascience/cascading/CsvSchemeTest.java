@@ -28,34 +28,127 @@ import java.util.List;
 public class CsvSchemeTest extends TestCase {
 
   /**
-   * Tests the CSV scheme.
+   * Tests the CSV scheme source with headers.
    */
-  public void testCsvScheme() throws Exception {
-    String inputPath = "src/test/resources/input/test1.txt";
-    String outputPath = "src/test/resources/output/test1";
-    String expectedPath = "src/test/resources/expected/test1.txt";
+  public void testCsvSourceWithHeaders() throws Exception {
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/source-with-headers";
+    String expectedPath = "src/test/resources/expected/with-headers.txt";
 
-    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name")
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
-    CSVFormat inputFormat = CSVFormat.newFormat(',')
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath);
+  }
+
+  /**
+   * Tests the CSV scheme source with detected headers.
+   */
+  public void testCsvSourceDetectHeaders() throws Exception {
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/source-detect-headers";
+    String expectedPath = "src/test/resources/expected/with-headers.txt";
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
       .withQuote('"')
       .withSkipHeaderRecord()
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    CSVFormat outputFormat = CSVFormat.newFormat('\t')
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath);
+  }
+
+  /**
+   * Tests the CSV scheme source with generated headers.
+   */
+  public void testCsvSourceGenerateHeaders() throws Exception {
+    String sourcePath = "src/test/resources/input/without-headers.txt";
+    String sinkPath = "src/test/resources/output/source-generate-headers";
+    String expectedPath = "src/test/resources/expected/with-generated-headers.txt";
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath);
+  }
+
+  /**
+   * Tests the CSV scheme sink without headers.
+   */
+  public void testCsvSinkWithHeaders() throws Exception {
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-with-headers";
+    String expectedPath = "src/test/resources/expected/with-headers.txt";
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name")
       .withSkipHeaderRecord()
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    Tap source = new Hfs(new CsvScheme(inputFormat), inputPath);
-    Tap sink = new Hfs(new CsvScheme(outputFormat), outputPath);
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath);
+  }
+
+  /**
+   * Tests the CSV scheme sink without headers.
+   */
+  public void testCsvSinkWithoutHeaders() throws Exception {
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-without-headers";
+    String expectedPath = "src/test/resources/expected/without-headers.txt";
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name")
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath);
+  }
+
+  /**
+   * Tests a source and sink scheme together.
+   */
+  private void testScheme(String sourcePath, CSVFormat sourceFormat, String sinkPath, CSVFormat sinkFormat, String expectedPath) throws Exception {
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+
+    Tap source = new Hfs(new CsvScheme(sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
 
     Pipe pipe = new Pipe("pipe");
 
     connector.connect(source, sink, pipe).complete();
 
-    testPaths(outputPath, expectedPath);
+    testPaths(sinkPath, expectedPath);
   }
 
   /**
@@ -87,7 +180,7 @@ public class CsvSchemeTest extends TestCase {
 
   @Override
   public void tearDown() throws Exception {
-    FileUtils.deleteDirectory(new File("src/test/resources/output"));
+    // FileUtils.deleteDirectory(new File("src/test/resources/output"));
   }
 
 }
