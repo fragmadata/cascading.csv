@@ -31,10 +31,10 @@ import java.io.IOException;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]> {
-  private CSVFormat format;
+  private final CSVFormat format;
 
   public CsvScheme() {
-    super();
+    this(CSVFormat.DEFAULT);
   }
 
   public CsvScheme(CSVFormat format) {
