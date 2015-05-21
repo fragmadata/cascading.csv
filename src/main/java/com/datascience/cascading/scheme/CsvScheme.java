@@ -34,21 +34,19 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   private final CSVFormat format;
 
   public CsvScheme() {
-    this(CSVFormat.DEFAULT);
+    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT);
   }
 
   public CsvScheme(CSVFormat format) {
-    super();
-    this.format = format;
+    this(Fields.ALL, Fields.ALL, format);
   }
 
-  public CsvScheme(Fields sourceFields) {
-    this(sourceFields, CSVFormat.DEFAULT);
+  public CsvScheme(Fields fields) {
+    this(fields, fields, CSVFormat.DEFAULT);
   }
 
-  public CsvScheme(Fields sourceFields, CSVFormat format) {
-    super(sourceFields);
-    this.format = format;
+  public CsvScheme(Fields fields, CSVFormat format) {
+    this(fields, fields, format);
   }
 
   public CsvScheme(Fields sourceFields, Fields sinkFields) {
@@ -56,17 +54,22 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   }
 
   public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format) {
-    super(sourceFields, sinkFields);
+    super();
+    setSourceFields(sourceFields);
+    setSinkFields(sinkFields);
     this.format = format;
   }
 
   @Override
   public Fields retrieveSourceFields(FlowProcess<JobConf> flowProcess, Tap tap) {
-    if (format.getSkipHeaderRecord() && format.getHeader() == null && getSourceFields().isUnknown() || getSourceFields().isSubstitution()) {
+    if (!getSourceFields().isUnknown())
+      return getSourceFields();
+
+    if (format.getSkipHeaderRecord() && format.getHeader() == null) {
       setSourceFields(detectHeader(flowProcess, tap, false));
     } else if (format.getHeader() != null) {
       setSourceFields(new Fields(format.getHeader()));
-    } else if (getSourceFields().isUnknown() || getSourceFields().isSubstitution()) {
+    } else {
       setSourceFields(detectHeader(flowProcess, tap, true));
     }
     return getSourceFields();
