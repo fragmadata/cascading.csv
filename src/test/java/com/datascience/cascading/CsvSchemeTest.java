@@ -180,7 +180,7 @@ public class CsvSchemeTest extends TestCase {
 
   @Override
   public void tearDown() throws Exception {
-    // FileUtils.deleteDirectory(new File("src/test/resources/output"));
+    FileUtils.deleteDirectory(new File("src/test/resources/output"));
   }
 
 }
