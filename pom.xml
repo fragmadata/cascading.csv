@@ -124,7 +124,7 @@
         <version>${maven.surefire.plugin.version}</version>
         <configuration>
           <includes>
-            <include>**/unit/*Test*.java</include>
+            <include>**/*Test*.java</include>
           </includes>
         </configuration>
       </plugin>
