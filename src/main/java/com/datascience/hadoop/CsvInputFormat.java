@@ -18,7 +18,7 @@ import java.io.InputStream;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<Text>> {
+public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<Text>> implements JobConfigurable {
   public static final String CSV_READER_COLUMNS = "csv.reader.columns";
   public static final String CSV_READER_SKIP_HEADER = "csv.reader.skip_header";
   public static final String CSV_READER_DELIMITER = "csv.reader.delimiter";
@@ -40,9 +40,17 @@ public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<T
   public static final boolean DEFAULT_CSV_READER_IGNORE_SURROUNDING_SPACES = CSVFormat.DEFAULT.getIgnoreSurroundingSpaces();
   public static final String DEFAULT_CSV_READER_NULL_STRING = CSVFormat.DEFAULT.getNullString();
 
+  private CompressionCodecFactory codecs;
+
   @Override
-  protected boolean isSplitable(FileSystem fs, Path filename) {
-    return true;
+  public void configure(JobConf conf) {
+    codecs = new CompressionCodecFactory(conf);
+  }
+
+  @Override
+  protected boolean isSplitable(FileSystem fs, Path path) {
+    final CompressionCodec codec = codecs.getCodec(path);
+    return codec == null || codec instanceof SplittableCompressionCodec;
   }
 
   @Override
