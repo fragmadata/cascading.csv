@@ -14,7 +14,6 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import com.datascience.hadoop.CsvInputFormat;
 import com.datascience.hadoop.CsvOutputFormat;
-import com.datascience.hadoop.CsvRecordReader;
 import com.datascience.hadoop.ListWritable;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -174,36 +173,36 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     // is enabled then that indicates that field names were detected. We need to ensure that headers are defined in order
     // for the CSV reader to skip the header record.
     if (format.getHeader() != null) {
-      conf.setStrings(CsvRecordReader.CSV_READER_COLUMNS, format.getHeader());
+      conf.setStrings(CsvInputFormat.CSV_READER_COLUMNS, format.getHeader());
     } else if (format.getSkipHeaderRecord()) {
       Fields fields = getSourceFields();
       String[] columns = new String[fields.size()];
       for (int i = 0; i < fields.size(); i++) {
         columns[i] = fields.get(i).toString();
       }
-      conf.setStrings(CsvRecordReader.CSV_READER_COLUMNS, columns);
+      conf.setStrings(CsvInputFormat.CSV_READER_COLUMNS, columns);
     }
 
-    conf.setBoolean(CsvRecordReader.CSV_READER_SKIP_HEADER, format.getSkipHeaderRecord());
-    conf.set(CsvRecordReader.CSV_READER_DELIMITER, String.valueOf(format.getDelimiter()));
+    conf.setBoolean(CsvInputFormat.CSV_READER_SKIP_HEADER, format.getSkipHeaderRecord());
+    conf.set(CsvInputFormat.CSV_READER_DELIMITER, String.valueOf(format.getDelimiter()));
 
     if (format.getRecordSeparator() != null)
-      conf.set(CsvRecordReader.CSV_READER_RECORD_SEPARATOR, format.getRecordSeparator());
+      conf.set(CsvInputFormat.CSV_READER_RECORD_SEPARATOR, format.getRecordSeparator());
 
     if (format.getQuoteCharacter() != null)
-      conf.set(CsvRecordReader.CSV_READER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
+      conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER, String.valueOf(format.getQuoteCharacter()));
 
     if (format.getQuoteMode() != null)
-      conf.set(CsvRecordReader.CSV_READER_QUOTE_MODE, format.getQuoteMode().name());
+      conf.set(CsvInputFormat.CSV_READER_QUOTE_MODE, format.getQuoteMode().name());
 
     if (format.getEscapeCharacter() != null)
-      conf.set(CsvRecordReader.CSV_READER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
+      conf.set(CsvInputFormat.CSV_READER_ESCAPE_CHARACTER, String.valueOf(format.getEscapeCharacter()));
 
-    conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
-    conf.setBoolean(CsvRecordReader.CSV_READER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
+    conf.setBoolean(CsvInputFormat.CSV_READER_IGNORE_EMPTY_LINES, format.getIgnoreEmptyLines());
+    conf.setBoolean(CsvInputFormat.CSV_READER_IGNORE_SURROUNDING_SPACES, format.getIgnoreSurroundingSpaces());
 
     if (format.getNullString() != null)
-      conf.set(CsvRecordReader.CSV_READER_NULL_STRING, format.getNullString());
+      conf.set(CsvInputFormat.CSV_READER_NULL_STRING, format.getNullString());
   }
 
   /**
