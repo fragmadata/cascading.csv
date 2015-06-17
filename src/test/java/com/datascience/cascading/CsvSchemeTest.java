@@ -30,8 +30,21 @@ public class CsvSchemeTest extends TestCase {
   /**
    * Tests the CSV scheme source with headers.
    */
-  public void testCsvSourceWithHeaders() throws Exception {
-    String sourcePath = "src/test/resources/input/with-headers.txt";
+  public void testUncompressedCsvSourceWithHeaders() throws Exception {
+    testCsvSourceWithHeaders("src/test/resources/input/with-headers.txt");
+  }
+
+  /**
+   * Tests the CSV scheme source with headers.
+   */
+  public void testCompressedCsvSourceWithHeaders() throws Exception {
+    testCsvSourceWithHeaders("src/test/resources/input/with-headers.txt.gz");
+  }
+
+  /**
+   * Tests the CSV scheme source with headers.
+   */
+  private void testCsvSourceWithHeaders(String inputPath) throws Exception {
     String sinkPath = "src/test/resources/output/source-with-headers";
     String expectedPath = "src/test/resources/expected/with-headers.txt";
 
@@ -46,14 +59,27 @@ public class CsvSchemeTest extends TestCase {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath);
+    testScheme(inputPath, sourceFormat, sinkPath, sinkFormat, expectedPath);
   }
 
   /**
    * Tests the CSV scheme source with detected headers.
    */
-  public void testCsvSourceDetectHeaders() throws Exception {
-    String sourcePath = "src/test/resources/input/with-headers.txt";
+  public void testUncompressedCsvSourceDetectHeaders() throws Exception {
+    testCsvSourceDetectHeaders("src/test/resources/input/with-headers.txt");
+  }
+
+  /**
+   * Tests the CSV scheme source with detected headers.
+   */
+  public void testCompressedCsvSourceDetectHeaders() throws Exception {
+    testCsvSourceDetectHeaders("src/test/resources/input/with-headers.txt.gz");
+  }
+
+  /**
+   * Tests the CSV scheme source with detected headers.
+   */
+  private void testCsvSourceDetectHeaders(String inputPath) throws Exception {
     String sinkPath = "src/test/resources/output/source-detect-headers";
     String expectedPath = "src/test/resources/expected/with-headers.txt";
 
@@ -67,7 +93,7 @@ public class CsvSchemeTest extends TestCase {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath);
+    testScheme(inputPath, sourceFormat, sinkPath, sinkFormat, expectedPath);
   }
 
   /**
