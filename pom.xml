@@ -54,6 +54,28 @@
       <id>maven-central</id>
       <url>http://repo1.maven.org/maven2/</url>
     </repository>
+    <repository>
+      <id>datascience-maven-release</id>
+      <name>S3 Release Repository</name>
+      <url>s3://datascience-maven/release</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>datascience-maven-snapshot</id>
+      <name>S3 Snapshot Repository</name>
+      <url>s3://datascience-maven/snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <distributionManagement>
