@@ -49,12 +49,7 @@ public class CsvRecordReaderTest extends CSVHelper {
     File inputFile = getFile(fileName);
     Path inputPath = new Path(inputFile.getAbsoluteFile().toURI().toString());
     FileSplit split = createFileSplit(inputPath, 0, inputFile.length());
-    CSVFormat format = CSVFormat.newFormat(',')
-      .withQuote('"')
-      .withHeader("id", "first name", "last name")
-      .withSkipHeaderRecord()
-      .withEscape('\\')
-      .withRecordSeparator('\n');
+
     RecordReader createdReader = createRecordReader(inputFormat, split);
 
     LongWritable key = new LongWritable();
@@ -69,9 +64,7 @@ public class CsvRecordReaderTest extends CSVHelper {
 
       assertEquals(expectedKey, key.get());
       expectedKey++;
-      for (Text val : value) {
-        System.out.println(val);
-      }
+
 
       assertEquals(expectedRowLength, value.size());
 
