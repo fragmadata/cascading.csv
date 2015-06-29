@@ -1,6 +1,8 @@
 # Cascading.CSV
 This project provides a simple CSV scheme for [Cascading](http://cascading.org) that supports both source and sink taps.
 
+#### [JavaDocs](http://datascienceinc.github.io/cascading.csv/java/)
+
 ## Rationale
 
 You may be thinking [Cascading already has a CSV scheme](https://github.com/tresata/cascading-opencsv/blob/master/src/main/java/com/tresata/cascading/opencsv/OpenCsvScheme.java)
