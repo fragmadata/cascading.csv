@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author amareeshbasanapalli
  */
-public class CsvRecordReaderTest extends CSVHelper {
+public class CsvRecordReaderTest extends CsvHelper {
 
   @Before
   public void initialize() throws IOException {

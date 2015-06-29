@@ -15,7 +15,7 @@ import java.net.URL;
  *
  * @author amareeshbasanapalli
  */
-public abstract class CSVHelper {
+public abstract class CsvHelper {
   Configuration conf;
   JobConf config;
   FileSystem fs;
