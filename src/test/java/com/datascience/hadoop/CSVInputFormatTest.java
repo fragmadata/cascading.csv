@@ -23,8 +23,8 @@ public class CSVInputFormatTest extends CSVHelper {
 
   @Before
   public void initialize() throws IOException {
-    setUp();
-
+    String [] columns = {"id","first name", "last name" };
+    setUp(",", "true", "\n", columns) ;
   }
 
   @Test

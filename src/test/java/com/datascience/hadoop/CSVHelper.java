@@ -33,6 +33,20 @@ public abstract class CSVHelper {
     fs = FileSystem.get(conf);
   }
 
+  public void setUp(String delimiter, String skipHeader, String recordSeparator, String[] columns) throws IOException {
+    conf = new Configuration();
+    conf.set("fs.default.name", "file:///");
+    conf.set(CsvInputFormat.CSV_READER_DELIMITER, delimiter);
+    conf.set(CsvInputFormat.CSV_READER_SKIP_HEADER, skipHeader);
+    conf.set(CsvInputFormat.CSV_READER_RECORD_SEPARATOR, recordSeparator);
+    conf.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
+    conf.setStrings(CsvInputFormat.CSV_READER_COLUMNS, columns );
+    conf.set("io.compression.codecs", "org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.DeflateCodec,org.apache.hadoop.io.compress.SnappyCodec,org.apache.hadoop.io.compress.Lz4Codec");
+
+    config = new JobConf(conf);
+    fs = FileSystem.get(conf);
+  }
+
 
   public CsvInputFormat createCSVInputFormat() {
 
