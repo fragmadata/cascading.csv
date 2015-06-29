@@ -43,33 +43,125 @@ import org.apache.hadoop.mapred.RecordReader;
 import java.io.IOException;
 
 /**
- * CSV scheme.
+ * The CSV scheme provides support for parsing and formatting CSV files using
+ * <a href="https://commons.apache.org/proper/commons-csv/">Apache Commons CSV</a>.
+ * <p>
+ * This scheme is designed for use a source or a sink in a Hadoop MR2 flow.
+ * <p>
+ * To use the scheme, simply construct a new instance, passing either the {@link cascading.tuple.Fields} or a
+ * {@link org.apache.commons.csv.CSVFormat} defining the structure of the CSV file.
+ * <pre>
+ *   {@code
+ *     CSVFormat format = CSVFormat.newFormat(',')
+ *       .withHeader("user_id", "first_name", "last_name")
+ *       .withSkipHeaderRecord(true);
+ *     CsvScheme scheme = new CsvScheme(format);
+ *     Tap tap = new Hfs(scheme, "hdfs://users.csv");
+ *   }
+ * </pre>
+ * <p>
+ * The CSV scheme changes its behavior according to the {@link cascading.tuple.Fields} or {@link org.apache.commons.csv.CSVFormat}
+ * provided to the constructor. In cases where fields or columns are not directly specified in the configuration, the
+ * scheme may be able to detect the field names from the CSV header. See specific constructors for more information.
+ * <p>
+ * Internally, {@code CsvScheme} uses {@link com.datascience.hadoop.CsvInputFormat} and {@link com.datascience.hadoop.CsvOutputFormat}
+ * for sourcing and sinking data respectively. These custom Hadoop input/output formats allow the scheme complete control
+ * over the encoding, compression, parsing, and formatting of bytes beneath Cascading's abstractions.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]> {
   private final CSVFormat format;
 
+  /**
+   * Creates a new CSV scheme with {@link org.apache.commons.csv.CSVFormat#DEFAULT}.
+   * <p>
+   * Note that because the default {@link org.apache.commons.csv.CSVFormat} does not specify a header record or skip the
+   * header record, this constructor will result in {@link cascading.tuple.Fields} being dynamically generated for sources.
+   * Source fields will be generated with positional names, e.g. {@code col1}, {@code col2}, {@code col3}, etc.
+   */
   public CsvScheme() {
     this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT);
   }
 
+  /**
+   * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
+   * <p>
+   * When used as a source, if {@link org.apache.commons.csv.CSVFormat#getHeader()} is specified, the provided header
+   * column names will be used in the output {@link cascading.tuple.Fields}. If no headers are specified and
+   * {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()} is {@code true}, the scheme will attempt to automatically
+   * detect the header record from the first record in the CSV input. If {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()}
+   * is {@code false} and no header record is provided, positional {@link cascading.tuple.Fields} will be generated, e.g.
+   * {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param format The format with which to parse (source) or format (sink) records.
+   */
   public CsvScheme(CSVFormat format) {
     this(Fields.ALL, Fields.ALL, format);
   }
 
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param fields The source and sink fields.
+   */
   public CsvScheme(Fields fields) {
     this(fields, fields, CSVFormat.DEFAULT);
   }
 
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record, the
+   * source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param fields The source and sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   */
   public CsvScheme(Fields fields, CSVFormat format) {
     this(fields, fields, format);
   }
 
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   */
   public CsvScheme(Fields sourceFields, Fields sinkFields) {
     this(sourceFields, sinkFields, CSVFormat.DEFAULT);
   }
 
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record,
+   * the source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   */
   public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format) {
     super();
     setSourceFields(sourceFields);
