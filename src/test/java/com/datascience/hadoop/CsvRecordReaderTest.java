@@ -25,16 +25,25 @@ public class CsvRecordReaderTest extends CSVHelper {
     setUp();
   }
 
+  /**
+   * Tests if RecordReader reads all records from regular input file.
+   */
   @Test
   public void readerShouldReadAllRecords() throws IOException {
     testForReadAllRecords("/input/with-headers.txt", 3, 6);
   }
 
+  /**
+   * Tests if RecordReader reads all records from compressed input file.
+   */
   @Test
   public void readerShouldReadAllRecordsFromCompressedFile() throws IOException {
     testForReadAllRecords("/input/with-headers.txt.gz", 3, 6);
   }
 
+  /**
+   * Helper function that iterates through Record Reader and assert values.
+   */
   public void testForReadAllRecords(String fileName, int expectedRowLength, int expectedRecordCount) throws IOException {
     CsvInputFormat inputFormat = createCSVInputFormat();
     File inputFile = getFile(fileName);

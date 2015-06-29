@@ -25,6 +25,10 @@ public class CSVInputFormatTest extends CSVHelper {
     setUp(",", "true", "\n", columns) ;
   }
 
+  /**
+   *
+   * Tests if CSVInputFormat returns a valid Record Reader.
+   */
   @Test
   public void formatShouldReturnValidRecordReader() throws IOException {
     CsvInputFormat format = createCSVInputFormat();
@@ -34,6 +38,9 @@ public class CSVInputFormatTest extends CSVHelper {
     assertTrue(createRecordReader(format, split) instanceof CsvRecordReader);
   }
 
+  /**
+   * Tests to see if compressed files support seek.
+   */
   @Test(expected = IOException.class)
   public void nonSplittableCodecShouldNotSupportSeek() throws IOException {
     CsvInputFormat format = ReflectionUtils.newInstance(CsvInputFormat.class, conf);
@@ -45,6 +52,9 @@ public class CSVInputFormatTest extends CSVHelper {
     createRecordReader(format, split);
   }
 
+  /**
+   * Test to check if splits are supported by non compressed files.
+   */
   @Test
   public void regularFilesShouldBeAbleToSplit() throws IOException {
     CsvInputFormat format = ReflectionUtils.newInstance(CsvInputFormat.class, conf);
@@ -55,6 +65,9 @@ public class CSVInputFormatTest extends CSVHelper {
     assertTrue(format.isSplitable(fs, inputPath));
   }
 
+  /**
+   * Tests to see if compressed files support splits.
+   */
   @Test
   public void compressedFilesShouldNeverSplit() throws IOException {
     CsvInputFormat format = ReflectionUtils.newInstance(CsvInputFormat.class, conf);
