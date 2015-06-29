@@ -1,50 +1,41 @@
 package com.datascience.hadoop;
 
-
-import org.apache.commons.csv.CSVFormat;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.RecordReader;
-import org.apache.log4j.ConsoleAppender;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+
+import static org.junit.Assert.assertEquals;
 
 /**
- * Created by amareeshbasanapalli on 6/19/15.
+ * CSV record reader tests.
+ *
+ * @author amareeshbasanapalli
  */
 public class CsvRecordReaderTest extends CSVHelper {
 
   @Before
   public void initialize() throws IOException {
     setUp();
-
   }
 
   @Test
   public void readerShouldReadAllRecords() throws IOException {
-
     testForReadAllRecords("/input/with-headers.txt", 3, 6);
   }
 
-
   @Test
   public void readerShouldReadAllRecordsFromCompressedFile() throws IOException {
-
     testForReadAllRecords("/input/with-headers.txt.gz", 3, 6);
-
   }
 
   public void testForReadAllRecords(String fileName, int expectedRowLength, int expectedRecordCount) throws IOException {
-
     CsvInputFormat inputFormat = createCSVInputFormat();
     File inputFile = getFile(fileName);
     Path inputPath = new Path(inputFile.getAbsoluteFile().toURI().toString());
@@ -65,9 +56,7 @@ public class CsvRecordReaderTest extends CSVHelper {
       assertEquals(expectedKey, key.get());
       expectedKey++;
 
-
       assertEquals(expectedRowLength, value.size());
-
     }
     assertEquals(expectedRecordCount, actualRecordCount);
   }

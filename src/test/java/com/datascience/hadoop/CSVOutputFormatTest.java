@@ -5,20 +5,21 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.nio.file.FileSystem;
-
 /**
- * Created by amareeshbasanapalli on 6/23/15.
+ * CSV output format tests.
+ *
+ * @author amareeshbasanapalli
  */
 public class CSVOutputFormatTest extends CSVHelper {
 
   @Before
   public void initialize() throws IOException {
-    String [] columns = {"id","first name", "last name" };
-    setUp(",", "true", "\n", columns) ;
+    String[] columns = {"id", "first name", "last name"};
+    setUp(",", "true", "\n", columns);
   }
 
   @Test
@@ -30,7 +31,6 @@ public class CSVOutputFormatTest extends CSVHelper {
 
     CsvOutputFormat format = ReflectionUtils.newInstance(CsvOutputFormat.class, conf);
     assertTrue(format.getRecordWriter(fs, config, "output", null) instanceof CsvRecordWriter);
-
   }
 
   @Test
@@ -42,6 +42,5 @@ public class CSVOutputFormatTest extends CSVHelper {
 
     CsvOutputFormat format = ReflectionUtils.newInstance(CsvOutputFormat.class, conf);
     assertTrue(format.getRecordWriter(fs, config, "output", null) instanceof CsvRecordWriter);
-
   }
 }

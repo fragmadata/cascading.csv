@@ -11,10 +11,11 @@ import java.io.IOException;
 import java.net.URL;
 
 /**
- * Created by amareeshbasanapalli on 6/23/15.
+ * CSV test helper.
+ *
+ * @author amareeshbasanapalli
  */
 public abstract class CSVHelper {
-
   Configuration conf;
   JobConf config;
   FileSystem fs;
@@ -47,17 +48,13 @@ public abstract class CSVHelper {
     fs = FileSystem.get(conf);
   }
 
-
   public CsvInputFormat createCSVInputFormat() {
-
     return ReflectionUtils.newInstance(CsvInputFormat.class, conf);
-
   }
 
   public File getFile(String path) {
     URL url = this.getClass().getResource(path);
     return new File(url.getFile());
-
   }
 
 
