@@ -1,6 +1,0 @@
-1,Jordan,Halterman
-2,Tom,Hummel
-3,Harrison,Cavallero
-4,Badar,Ahmed
-5,Tristan,Reid
-6,Mark,McKelvy
