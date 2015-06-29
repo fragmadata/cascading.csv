@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author amareeshbasanapalli
  */
-public class CSVOutputFormatTest extends CSVHelper {
+public class CsvOutputFormatTest extends CsvHelper {
 
   @Before
   public void initialize() throws IOException {
