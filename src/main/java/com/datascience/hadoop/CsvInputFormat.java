@@ -30,6 +30,12 @@ import java.io.InputStream;
 
 /**
  * CSV input format.
+ * <p>
+ * This custom input format supports reading records from a CSV file using <a href="https://commons.apache.org/proper/commons-csv/">Apache Commons CSV</a>.
+ * As with more basic Hadoop input formats such as {@link org.apache.hadoop.mapred.TextInputFormat}, this input format
+ * supports basic decompression through Hadoop's standard {@link org.apache.hadoop.io.compress.CompressionCodec codecs}.
+ * However, the limitations of the {@link com.datascience.hadoop.CsvRecordReader} mean that this input format <em>does not
+ * currently support input splits</em>.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */

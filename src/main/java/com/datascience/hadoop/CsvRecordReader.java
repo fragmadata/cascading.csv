@@ -30,6 +30,14 @@ import java.util.Iterator;
 
 /**
  * CSV record reader.
+ * <p>
+ * The CSV record reader handles reading CSV records from an {@link java.io.InputStream} on behalf of a
+ * {@link com.datascience.hadoop.CsvInputFormat}. Internally, the record reader uses a {@link org.apache.commons.csv.CSVParser}
+ * to iterate through the provided stream and parse records.
+ * <p>
+ * This record reader is agnostic about the compression of the provided input stream. Additionally, note that this
+ * reader does <em>not</em> currently support input splits. It instead assumes that all provided
+ * {@link java.io.InputStream streams} are representative of a full data set.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */

@@ -25,6 +25,9 @@ import java.util.*;
 
 /**
  * Hadoop writable for lists containing writable fields.
+ * <p>
+ * This is a small {@link org.apache.hadoop.io.Writable} implementation intended for storing sorted lists of values.
+ * Internally, a {@code T[]} pool is used to store and recycle lists of values of the given {@code type} for efficiency.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */

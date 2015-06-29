@@ -28,6 +28,11 @@ import java.io.OutputStreamWriter;
 
 /**
  * CSV record writer.
+ * <p>
+ * The CSV record writer handles writing {@link com.datascience.hadoop.ListWritable} instances out to CSV files on behalf
+ * of {@link com.datascience.hadoop.CsvOutputFormat}. Internally, it uses a {@link org.apache.commons.csv.CSVPrinter}
+ * configured by its parent {@link org.apache.hadoop.mapred.OutputFormat} to write CSV records out to the provided
+ * {@link java.io.OutputStream}.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
