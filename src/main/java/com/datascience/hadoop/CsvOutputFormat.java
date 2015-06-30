@@ -49,15 +49,15 @@ public class CsvOutputFormat extends FileOutputFormat<LongWritable, ListWritable
   public static final String CSV_WRITER_IGNORE_SURROUNDING_SPACES = "csv.writer.ignore_surrounding_lines";
   public static final String CSV_WRITER_NULL_STRING = "csv.writer.null";
 
-  public static final boolean DEFAULT_CSV_WRITER_SKIP_HEADER = CSVFormat.DEFAULT.getSkipHeaderRecord();
-  public static final String DEFAULT_CSV_WRITER_DELIMITER = String.valueOf(CSVFormat.DEFAULT.getDelimiter());
-  public static final String DEFAULT_CSV_WRITER_RECORD_SEPARATOR = CSVFormat.DEFAULT.getRecordSeparator();
-  public static final String DEFAULT_CSV_WRITER_QUOTE_CHARACTER = String.valueOf(CSVFormat.DEFAULT.getQuoteCharacter());
-  public static final String DEFAULT_CSV_WRITER_QUOTE_MODE = CSVFormat.DEFAULT.getQuoteMode() != null ? CSVFormat.DEFAULT.getQuoteMode().name() : null;
-  public static final String DEFAULT_CSV_WRITER_ESCAPE_CHARACTER = null;
-  public static final boolean DEFAULT_CSV_WRITER_IGNORE_EMPTY_LINES = CSVFormat.DEFAULT.getIgnoreEmptyLines();
-  public static final boolean DEFAULT_CSV_WRITER_IGNORE_SURROUNDING_SPACES = CSVFormat.DEFAULT.getIgnoreSurroundingSpaces();
-  public static final String DEFAULT_CSV_WRITER_NULL_STRING = CSVFormat.DEFAULT.getNullString();
+  private static final boolean DEFAULT_CSV_WRITER_SKIP_HEADER = CSVFormat.DEFAULT.getSkipHeaderRecord();
+  private static final String DEFAULT_CSV_WRITER_DELIMITER = String.valueOf(CSVFormat.DEFAULT.getDelimiter());
+  private static final String DEFAULT_CSV_WRITER_RECORD_SEPARATOR = CSVFormat.DEFAULT.getRecordSeparator();
+  private static final String DEFAULT_CSV_WRITER_QUOTE_CHARACTER = String.valueOf(CSVFormat.DEFAULT.getQuoteCharacter());
+  private static final String DEFAULT_CSV_WRITER_QUOTE_MODE = CSVFormat.DEFAULT.getQuoteMode() != null ? CSVFormat.DEFAULT.getQuoteMode().name() : null;
+  private static final String DEFAULT_CSV_WRITER_ESCAPE_CHARACTER = null;
+  private static final boolean DEFAULT_CSV_WRITER_IGNORE_EMPTY_LINES = CSVFormat.DEFAULT.getIgnoreEmptyLines();
+  private static final boolean DEFAULT_CSV_WRITER_IGNORE_SURROUNDING_SPACES = CSVFormat.DEFAULT.getIgnoreSurroundingSpaces();
+  private static final String DEFAULT_CSV_WRITER_NULL_STRING = CSVFormat.DEFAULT.getNullString();
 
   @Override
   public RecordWriter<LongWritable, ListWritable<Text>> getRecordWriter(FileSystem fileSystem, JobConf conf, String name, Progressable progress) throws IOException {

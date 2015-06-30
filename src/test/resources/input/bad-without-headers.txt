@@ -1,0 +1,5 @@
+"123"	"If you can't fly, then run. If you can't run, then walk. If you can't walk, then crawl. But whatever you do, you have to keep moving forward."	"0"	"0"	"0"
+"234"	"If today were the last day of your life, would you want to do what you are about to do today?
+\
+\\\	"0"	"0"	"0"
+"345"	"Freedom is not worth having if it does not include freedom to make mistakes."	"0"	"0"	"0"
