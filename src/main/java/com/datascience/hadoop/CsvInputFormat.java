@@ -52,15 +52,15 @@ public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<T
   public static final String CSV_READER_IGNORE_SURROUNDING_SPACES = "csv.reader.ignore_surrounding_lines";
   public static final String CSV_READER_NULL_STRING = "csv.reader.null";
 
-  public static final boolean DEFAULT_CSV_READER_SKIP_HEADER = CSVFormat.DEFAULT.getSkipHeaderRecord();
-  public static final String DEFAULT_CSV_READER_DELIMITER = String.valueOf(CSVFormat.DEFAULT.getDelimiter());
-  public static final String DEFAULT_CSV_READER_RECORD_SEPARATOR = CSVFormat.DEFAULT.getRecordSeparator();
-  public static final String DEFAULT_CSV_READER_QUOTE_CHARACTER = String.valueOf(CSVFormat.DEFAULT.getQuoteCharacter());
-  public static final String DEFAULT_CSV_READER_QUOTE_MODE = CSVFormat.DEFAULT.getQuoteMode() != null ? CSVFormat.DEFAULT.getQuoteMode().name() : null;
-  public static final String DEFAULT_CSV_READER_ESCAPE_CHARACTER = null;
-  public static final boolean DEFAULT_CSV_READER_IGNORE_EMPTY_LINES = CSVFormat.DEFAULT.getIgnoreEmptyLines();
-  public static final boolean DEFAULT_CSV_READER_IGNORE_SURROUNDING_SPACES = CSVFormat.DEFAULT.getIgnoreSurroundingSpaces();
-  public static final String DEFAULT_CSV_READER_NULL_STRING = CSVFormat.DEFAULT.getNullString();
+  private static final boolean DEFAULT_CSV_READER_SKIP_HEADER = CSVFormat.DEFAULT.getSkipHeaderRecord();
+  private static final String DEFAULT_CSV_READER_DELIMITER = String.valueOf(CSVFormat.DEFAULT.getDelimiter());
+  private static final String DEFAULT_CSV_READER_RECORD_SEPARATOR = CSVFormat.DEFAULT.getRecordSeparator();
+  private static final String DEFAULT_CSV_READER_QUOTE_CHARACTER = String.valueOf(CSVFormat.DEFAULT.getQuoteCharacter());
+  private static final String DEFAULT_CSV_READER_QUOTE_MODE = CSVFormat.DEFAULT.getQuoteMode() != null ? CSVFormat.DEFAULT.getQuoteMode().name() : null;
+  private static final String DEFAULT_CSV_READER_ESCAPE_CHARACTER = null;
+  private static final boolean DEFAULT_CSV_READER_IGNORE_EMPTY_LINES = CSVFormat.DEFAULT.getIgnoreEmptyLines();
+  private static final boolean DEFAULT_CSV_READER_IGNORE_SURROUNDING_SPACES = CSVFormat.DEFAULT.getIgnoreSurroundingSpaces();
+  private static final String DEFAULT_CSV_READER_NULL_STRING = CSVFormat.DEFAULT.getNullString();
 
   private CompressionCodecFactory codecs;
 
