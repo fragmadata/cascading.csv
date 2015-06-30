@@ -70,8 +70,10 @@ public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<T
 
   @Override
   protected boolean isSplitable(FileSystem fs, Path path) {
-    final CompressionCodec codec = codecs.getCodec(path);
-    return codec == null || codec instanceof SplittableCompressionCodec;
+    // TODO: CsvRecordReader cannot currently support input splits.
+    // final CompressionCodec codec = codecs.getCodec(path);
+    // return codec == null || codec instanceof SplittableCompressionCodec;
+    return false;
   }
 
   @Override

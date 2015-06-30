@@ -68,19 +68,6 @@ public class CsvInputFormatTest extends CsvHelper {
   }
 
   /**
-   * Test to check if splits are supported by non compressed files.
-   */
-  @Test
-  public void regularFilesShouldBeAbleToSplit() throws IOException {
-    CsvInputFormat format = ReflectionUtils.newInstance(CsvInputFormat.class, conf);
-    format.configure(config);
-    File inputFile = getFile("/input/with-headers.txt");
-    Path inputPath = new Path(inputFile.getAbsoluteFile().toURI().toString());
-
-    assertTrue(format.isSplitable(fs, inputPath));
-  }
-
-  /**
    * Tests to see if compressed files support splits.
    */
   @Test
