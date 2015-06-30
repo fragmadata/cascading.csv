@@ -213,7 +213,7 @@
             <configuration>
               <show>public</show>
               <reportOutputDirectory>docs</reportOutputDirectory>
-              <destDir>java</destDir>
+              <destDir>java/${project.version}</destDir>
             </configuration>
             <executions>
               <execution>

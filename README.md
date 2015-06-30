@@ -1,6 +1,8 @@
 # Cascading.CSV
 This project provides a simple CSV scheme for [Cascading](http://cascading.org) that supports both source and sink taps.
 
+#### [JavaDocs](http://datascienceinc.github.io/cascading.csv/java/)
+
 ## Rationale
 
 You may be thinking [Cascading already has a CSV scheme](https://github.com/tresata/cascading-opencsv/blob/master/src/main/java/com/tresata/cascading/opencsv/OpenCsvScheme.java)
@@ -54,6 +56,29 @@ For source schemes, if `skipHeaderRecord` is `true` and no fields are provided t
 and output fields will be automatically detected from the source data set. Header detection is performed by parsing only
 the first row of the source and using the first row's values as headers.
 
+## Using with Maven
+
+Compiled binaries are available from [Conjars.org](www.conjars.org). 
+
+Be sure to add the repository to your pom.xml:
+```
+<repository>
+    <id>conjars.org</id>
+    <url>http://conjars.org/repo</url>
+</repository>
+```
+As well as the dependency:
+```
+<dependency>
+    <groupId>com.datascience</groupId>
+    <artifactId>cascading-csv</artifactId>
+    <version>${cascading.csv.version}</version>
+</dependency>
+```
+
+Snapshot and release artifacts can be found on Conjars.org. 
+
 ### License
+Licensed under the [Apache License version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 Copyright 2015 [DataScience, Inc](http://datascience.com)
