@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * CSV record reader.
@@ -42,16 +43,19 @@ import java.util.Iterator;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<Text>> {
+  private static final Logger LOGGER = Logger.getLogger(CsvRecordReader.class.getName());
   private final Text[] cache = new Text[1024];
   private final CSVParser parser;
   private final Iterator<CSVRecord> iterator;
   private final float start;
+  private final long end;
+  private final boolean strict;
   private long position;
-  private long end;
 
-  public CsvRecordReader(InputStream is, CSVFormat format, long start, long end) throws IOException {
+  public CsvRecordReader(InputStream is, CSVFormat format, long start, long end, boolean strict) throws IOException {
     this.start = start;
     this.end = end;
+    this.strict = strict;
     Reader isr = new InputStreamReader(is);
     parser = new CSVParser(isr, format, start, start);
     iterator = parser.iterator();
@@ -61,19 +65,30 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   public boolean next(LongWritable key, ListWritable<Text> value) throws IOException {
     value.clear();
     if (position < end && iterator.hasNext()) {
-      CSVRecord record = iterator.next();
-      key.set(record.getRecordNumber());
-      for (int i = 0; i < record.size(); i++) {
-        Text text = cache[i];
-        if (text == null) {
-          text = new Text();
-          cache[i] = text;
+      try {
+        CSVRecord record = iterator.next();
+        key.set(record.getRecordNumber());
+        for (int i = 0; i < record.size(); i++) {
+          Text text = cache[i];
+          if (text == null) {
+            text = new Text();
+            cache[i] = text;
+          }
+          text.set(record.get(i));
+          value.add(text);
         }
-        text.set(record.get(i));
-        value.add(text);
+        position = record.getCharacterPosition();
+        return true;
+      } catch (Exception e) {
+        LOGGER.warning("failed to parse record at position: " + position);
+        if (strict) {
+          throw e;
+        } else if (iterator.hasNext()) {
+          return next(key, value);
+        } else {
+          return false;
+        }
       }
-      position = record.getCharacterPosition();
-      return true;
     }
     return false;
   }

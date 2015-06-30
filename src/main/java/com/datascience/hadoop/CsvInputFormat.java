@@ -40,6 +40,7 @@ import java.io.InputStream;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<Text>> implements JobConfigurable {
+  public static final String STRICT_MODE = "csv.strict";
   public static final String CSV_READER_COLUMNS = "csv.reader.columns";
   public static final String CSV_READER_SKIP_HEADER = "csv.reader.skip_header";
   public static final String CSV_READER_DELIMITER = "csv.reader.delimiter";
@@ -105,7 +106,7 @@ public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<T
         is = codec.createInputStream(is, decompressor);
       }
     }
-    return new CsvRecordReader(is, createFormat(conf), start, end);
+    return new CsvRecordReader(is, createFormat(conf), start, end, conf.getBoolean(STRICT_MODE, true));
   }
 
   /**
