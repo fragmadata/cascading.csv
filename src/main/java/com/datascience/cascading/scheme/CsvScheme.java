@@ -399,6 +399,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     // If the format header was explicitly provided by the user then forward it to the record reader. If skipHeaderRecord
     // is enabled then that indicates that field names were detected. We need to ensure that headers are defined in order
     // for the CSV reader to skip the header record.
+    conf.setBoolean(CsvInputFormat.STRICT_MODE, strict);
     if (format.getHeader() != null) {
       conf.setStrings(CsvInputFormat.CSV_READER_COLUMNS, format.getHeader());
     } else if (format.getSkipHeaderRecord()) {

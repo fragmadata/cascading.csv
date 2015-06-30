@@ -21,13 +21,13 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.RecordReader;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 /**
  * CSV record reader.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<Text>> {
-  private static final Logger LOGGER = Logger.getLogger(CsvRecordReader.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(CsvRecordReader.class);
   private final Text[] cache = new Text[1024];
   private final CSVParser parser;
   private final Iterator<CSVRecord> iterator;
@@ -64,8 +64,8 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   @Override
   public boolean next(LongWritable key, ListWritable<Text> value) throws IOException {
     value.clear();
-    if (position < end && iterator.hasNext()) {
-      try {
+    try {
+      if (position < end && iterator.hasNext()) {
         CSVRecord record = iterator.next();
         key.set(record.getRecordNumber());
         for (int i = 0; i < record.size(); i++) {
@@ -79,15 +79,13 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
         }
         position = record.getCharacterPosition();
         return true;
-      } catch (Exception e) {
-        LOGGER.warning("failed to parse record at position: " + position);
-        if (strict) {
-          throw e;
-        } else if (iterator.hasNext()) {
-          return next(key, value);
-        } else {
-          return false;
-        }
+      }
+    } catch (Exception e) {
+      LOGGER.warn("failed to parse record at position: " + position);
+      if (strict) {
+        throw e;
+      } else {
+        return next(key, value);
       }
     }
     return false;

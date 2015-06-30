@@ -41,7 +41,6 @@ public class CsvInputFormatTest extends CsvHelper {
   }
 
   /**
-   *
    * Tests if CSVInputFormat returns a valid Record Reader.
    */
   @Test
