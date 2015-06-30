@@ -45,8 +45,8 @@
 
   <repositories>
     <repository>
-      <name>Conjars Repo</name>
-      <id>conjars</id>
+      <name>Concurrent Conjars repository</name>
+      <id>conjars.org</id>
       <url>http://conjars.org/repo</url>
     </repository>
     <repository>
@@ -58,10 +58,15 @@
 
   <distributionManagement>
     <repository>
-      <id>conjars</id>
+      <id>conjars.org</id>
       <name>Concurrent Conjars repository</name>
       <url>http://conjars.org/repo</url>
     </repository>
+    <snapshotRepository>
+      <id>conjars.org</id>
+      <name>Concurrent Conjars repository</name>
+      <url>http://conjars.org/repo</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <dependencies>
