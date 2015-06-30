@@ -31,6 +31,27 @@ Finally, the [CsvScheme](https://github.com/datascienceinc/cascading.csv/blob/ma
 provides the interface for operating on CSV sources and sinks within Cascading. Of course, `CsvInputFormat` and
 `CsvOutputFormat` can certainly be used independently of Cascading as well.
 
+### Installation
+
+To use the official release, add the [Conjars](http://conjars.org/) repository to your `pom.xml`:
+
+```
+<repository>
+  <id>conjars.org</id>
+  <url>http://conjars.org/repo</url>
+</repository>
+```
+
+Then add the following snippet to the `<dependencies>` section of your `pom.xml` file:
+
+```
+<dependency>
+  <groupId>com.datascience</groupId>
+  <artifactId>cascading-csv</artifactId>
+  <version>0.1</version>
+</dependency>
+```
+
 ## Usage
 
 To use the scheme, first construct a [CSVFormat](https://commons.apache.org/proper/commons-csv/apidocs/org/apache/commons/csv/CSVFormat.html).
