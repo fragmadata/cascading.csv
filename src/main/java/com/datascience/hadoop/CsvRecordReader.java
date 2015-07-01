@@ -67,6 +67,11 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
     try {
       if (position < end && iterator.hasNext()) {
         CSVRecord record = iterator.next();
+        if (!record.isConsistent()) {
+          LOGGER.warn("inconsistent record at position: " + position);
+          return next(key, value);
+        }
+
         key.set(record.getRecordNumber());
         for (int i = 0; i < record.size(); i++) {
           Text text = cache[i];

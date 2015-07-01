@@ -70,8 +70,6 @@ public class CsvInputFormatTest {
    */
   @Test(expected = IOException.class)
   public void nonSplittableCodecShouldNotSupportSeek() throws IOException {
-
-
     CsvInputFormat format = ReflectionUtils.newInstance(CsvInputFormat.class, conf);
 
     File inputFile = helper.getFile("/input/with-headers.txt.gz");

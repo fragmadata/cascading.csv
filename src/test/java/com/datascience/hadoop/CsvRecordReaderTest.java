@@ -68,12 +68,11 @@ public class CsvRecordReaderTest  {
     testForReadAllRecords("/input/with-headers.txt.gz", 3, 6);
   }
 
-
   /**
    * Test to check if records are skipped when strict mode is disabled.
    */
   @Test
-  public void readerShouldSkipErrorRecords () throws IOException{
+  public void readerShouldSkipErrorRecords() throws IOException{
     conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
     conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
     jobConf = new JobConf(conf);
@@ -81,7 +80,6 @@ public class CsvRecordReaderTest  {
 
     testForReadAllRecords("/input/skipped-lines.txt", 3, 4);
   }
-
 
   @Test(expected=RuntimeException.class)
   public void readerShouldNotParseErrorRecords()throws IOException{
@@ -91,7 +89,6 @@ public class CsvRecordReaderTest  {
     fs = FileSystem.get(conf);
 
     testForReadAllRecords("/input/skipped-lines.txt", 3, 4);
-
   }
 
   /**
@@ -117,7 +114,6 @@ public class CsvRecordReaderTest  {
 
       assertEquals(expectedKey, key.get());
       expectedKey++;
-
 
       assertEquals(expectedRowLength, value.size());
     }
