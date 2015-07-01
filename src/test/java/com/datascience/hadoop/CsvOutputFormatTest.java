@@ -16,6 +16,8 @@
 package com.datascience.hadoop;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.junit.After;
@@ -32,12 +34,20 @@ import static org.junit.Assert.assertTrue;
  *
  * @author amareeshbasanapalli
  */
-public class CsvOutputFormatTest extends CsvHelper {
+public class CsvOutputFormatTest  {
+
+  Configuration conf;
+  CsvHelper helper;
+  JobConf jobConf;
+  FileSystem fs;
+
 
   @Before
   public void initialize() throws IOException {
+    helper = new CsvHelper();
     String[] columns = {"id", "first name", "last name"};
-    setUp(",", "true", "\n", columns);
+   conf= helper.buildConfiguration(",", "true", "\n", columns);
+
   }
 
   /**
@@ -48,10 +58,12 @@ public class CsvOutputFormatTest extends CsvHelper {
     conf.set("mapreduce.output.fileoutputformat.compress", "true");
     conf.set("mapreduce.output.fileoutputformat.outputdir", "src/test/resources/output");
     conf.set("mapreduce.task.attempt.id", "attempt_200707121733_0003_m_00005_0");
-    config = new JobConf(conf);
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
+
 
     CsvOutputFormat format = ReflectionUtils.newInstance(CsvOutputFormat.class, conf);
-    assertTrue(format.getRecordWriter(fs, config, "output", null) instanceof CsvRecordWriter);
+    assertTrue(format.getRecordWriter(fs, jobConf, "output", null) instanceof CsvRecordWriter);
   }
 
   /**
@@ -62,10 +74,12 @@ public class CsvOutputFormatTest extends CsvHelper {
     conf.set("mapreduce.output.fileoutputformat.compress", "false");
     conf.set("mapreduce.output.fileoutputformat.outputdir", "src/test/resources/output");
     conf.set("mapreduce.task.attempt.id", "attempt_200707121733_0003_m_00005_0");
-    config = new JobConf(conf);
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
+
 
     CsvOutputFormat format = ReflectionUtils.newInstance(CsvOutputFormat.class, conf);
-    assertTrue(format.getRecordWriter(fs, config, "output", null) instanceof CsvRecordWriter);
+    assertTrue(format.getRecordWriter(fs, jobConf, "output", null) instanceof CsvRecordWriter);
   }
 
   @After

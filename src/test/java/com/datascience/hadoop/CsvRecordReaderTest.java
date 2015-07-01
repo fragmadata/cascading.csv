@@ -15,10 +15,13 @@
  */
 package com.datascience.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileSplit;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,11 +36,20 @@ import static org.junit.Assert.assertEquals;
  *
  * @author amareeshbasanapalli
  */
-public class CsvRecordReaderTest extends CsvHelper {
+public class CsvRecordReaderTest  {
+
+  Configuration conf;
+  CsvHelper helper;
+  JobConf jobConf;
+  FileSystem fs;
 
   @Before
   public void initialize() throws IOException {
-    setUp();
+    helper = new CsvHelper();
+    String[] columns = {"id", "first name", "last name"};
+    conf= helper.buildConfiguration(",", "true", "\n", columns);
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
   }
 
   /**
@@ -56,16 +68,42 @@ public class CsvRecordReaderTest extends CsvHelper {
     testForReadAllRecords("/input/with-headers.txt.gz", 3, 6);
   }
 
+
+  /**
+   * Test to check if records are skipped when strict mode is disabled.
+   */
+  @Test
+  public void readerShouldSkipErrorRecords () throws IOException{
+    conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
+    conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
+
+    testForReadAllRecords("/input/skipped-lines.txt", 3, 4);
+  }
+
+
+  @Test(expected=RuntimeException.class)
+  public void readerShouldNotParseErrorRecords()throws IOException{
+    conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
+
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
+
+    testForReadAllRecords("/input/skipped-lines.txt", 3, 4);
+
+  }
+
   /**
    * Helper function that iterates through Record Reader and assert values.
    */
   public void testForReadAllRecords(String fileName, int expectedRowLength, int expectedRecordCount) throws IOException {
-    CsvInputFormat inputFormat = createCSVInputFormat();
-    File inputFile = getFile(fileName);
+    CsvInputFormat inputFormat = helper.createCSVInputFormat(conf);
+    File inputFile = helper.getFile(fileName);
     Path inputPath = new Path(inputFile.getAbsoluteFile().toURI().toString());
-    FileSplit split = createFileSplit(inputPath, 0, inputFile.length());
+    FileSplit split = helper.createFileSplit(inputPath, 0, inputFile.length());
 
-    RecordReader createdReader = createRecordReader(inputFormat, split);
+    RecordReader createdReader = helper.createRecordReader(inputFormat, split, jobConf);
 
     LongWritable key = new LongWritable();
     ListWritable<Text> value = new ListWritable<Text>(Text.class);
@@ -79,6 +117,7 @@ public class CsvRecordReaderTest extends CsvHelper {
 
       assertEquals(expectedKey, key.get());
       expectedKey++;
+
 
       assertEquals(expectedRowLength, value.size());
     }

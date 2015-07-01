@@ -30,27 +30,25 @@ import java.net.URL;
  *
  * @author amareeshbasanapalli
  */
-public abstract class CsvHelper {
-  Configuration conf;
-  JobConf config;
-  FileSystem fs;
+public class CsvHelper {
 
-  public void setUp() throws IOException {
-    conf = new Configuration();
+
+  public Configuration getDefaultConf(){
+    Configuration conf = new Configuration();
     conf.set("fs.default.name", "file:///");
     conf.set(CsvInputFormat.CSV_READER_DELIMITER, ",");
     conf.set(CsvInputFormat.CSV_READER_SKIP_HEADER, "true");
     conf.set(CsvInputFormat.CSV_READER_RECORD_SEPARATOR, "\n");
     conf.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
-    conf.setStrings(CsvInputFormat.CSV_READER_COLUMNS, "id", "first name", "last name");
     conf.set("io.compression.codecs", "org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.DeflateCodec,org.apache.hadoop.io.compress.SnappyCodec,org.apache.hadoop.io.compress.Lz4Codec");
+    conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
+    conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
+   return conf;
 
-    config = new JobConf(conf);
-    fs = FileSystem.get(conf);
   }
 
-  public void setUp(String delimiter, String skipHeader, String recordSeparator, String[] columns) throws IOException {
-    conf = new Configuration();
+  public Configuration buildConfiguration(String delimiter, String skipHeader, String recordSeparator, String[] columns){
+     Configuration conf = new Configuration();
     conf.set("fs.default.name", "file:///");
     conf.set(CsvInputFormat.CSV_READER_DELIMITER, delimiter);
     conf.set(CsvInputFormat.CSV_READER_SKIP_HEADER, skipHeader);
@@ -58,12 +56,10 @@ public abstract class CsvHelper {
     conf.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
     conf.setStrings(CsvInputFormat.CSV_READER_COLUMNS, columns );
     conf.set("io.compression.codecs", "org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.DeflateCodec,org.apache.hadoop.io.compress.SnappyCodec,org.apache.hadoop.io.compress.Lz4Codec");
-
-    config = new JobConf(conf);
-    fs = FileSystem.get(conf);
+    return conf;
   }
 
-  public CsvInputFormat createCSVInputFormat() {
+  public CsvInputFormat createCSVInputFormat(Configuration conf) {
     return ReflectionUtils.newInstance(CsvInputFormat.class, conf);
   }
 
@@ -73,12 +69,9 @@ public abstract class CsvHelper {
   }
 
 
-  public RecordReader createRecordReader(InputFormat format, InputSplit split) throws IOException {
-
+  public RecordReader createRecordReader(InputFormat format, InputSplit split, JobConf jobConf) throws IOException {
     Reporter reporter = Reporter.NULL;
-    JobConf jobConf = new JobConf(config);
     return format.getRecordReader(split, jobConf, reporter);
-
   }
 
   public FileSplit createFileSplit(Path path, long start, long end) {
