@@ -352,7 +352,12 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     TupleEntry entry = sourceCall.getIncomingEntry();
     ListWritable<Text> values = (ListWritable<Text>) context[1];
     for (int i = 0; i < values.size(); i++) {
-      entry.setString(i, values.get(i).toString());
+      Text value = values.get(i);
+      if (value == null) {
+        entry.setString(i, null);
+      } else {
+        entry.setString(i, value.toString());
+      }
     }
     return true;
   }
@@ -386,7 +391,11 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     TupleEntry entry = sinkCall.getOutgoingEntry();
     Tuple tuple = entry.getTuple();
     for (Object value : tuple) {
-      record.add(new Text(value.toString()));
+      if (value == null) {
+        record.add(null);
+      } else {
+        record.add(new Text(value.toString()));
+      }
     }
 
     sinkCall.getOutput().collect(null, record);

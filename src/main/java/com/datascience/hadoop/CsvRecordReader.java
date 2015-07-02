@@ -74,13 +74,18 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
 
         key.set(record.getRecordNumber());
         for (int i = 0; i < record.size(); i++) {
-          Text text = cache[i];
-          if (text == null) {
-            text = new Text();
-            cache[i] = text;
+          String item = record.get(i);
+          if (item == null) {
+            value.add(null);
+          } else {
+            Text text = cache[i];
+            if (text == null) {
+              text = new Text();
+              cache[i] = text;
+            }
+            text.set(item);
+            value.add(text);
           }
-          text.set(record.get(i));
-          value.add(text);
         }
         position = record.getCharacterPosition();
         return true;
