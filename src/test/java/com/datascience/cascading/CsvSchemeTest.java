@@ -182,6 +182,31 @@ public class CsvSchemeTest {
   }
 
   /**
+   * Tests the CSV scheme reading and writing nulls.
+   */
+  @Test
+  public void testCsvNulls() throws Exception {
+    String sourcePath = "src/test/resources/input/with-nulls.txt";
+    String sinkPath = "src/test/resources/output/with-nulls";
+    String expectedPath = "src/test/resources/expected/with-nulls.txt";
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name")
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n')
+      .withNullString("\\N");
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withEscape('\\')
+      .withRecordSeparator('\n')
+      .withNullString("null");
+
+    testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath, true);
+  }
+
+  /**
    * Tests the CSV scheme sink without headers.
    */
   @Test

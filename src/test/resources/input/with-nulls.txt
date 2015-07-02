@@ -1,0 +1,7 @@
+id,first name,last name
+1,Jordan,Halterman
+2,Tom,\N
+3,Harrison,Cavallero
+4,\N,Ahmed
+5,Tristan,Reid
+6,Mark,McKelvy
