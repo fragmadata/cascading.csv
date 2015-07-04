@@ -47,17 +47,15 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   private final Text[] cache = new Text[1024];
   private final CSVParser parser;
   private final Iterator<CSVRecord> iterator;
-  private final float start;
-  private final long end;
+  private final long length;
   private final boolean strict;
   private long position;
 
-  public CsvRecordReader(InputStream is, CSVFormat format, long start, long end, boolean strict) throws IOException {
-    this.start = start;
-    this.end = end;
+  public CsvRecordReader(InputStream is, CSVFormat format, long length, boolean strict) throws IOException {
+    this.length = length;
     this.strict = strict;
     Reader isr = new InputStreamReader(is);
-    parser = new CSVParser(isr, format, start, start);
+    parser = new CSVParser(isr, format);
     iterator = parser.iterator();
   }
 
@@ -65,7 +63,7 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   public boolean next(LongWritable key, ListWritable<Text> value) throws IOException {
     value.clear();
     try {
-      if (position < end && iterator.hasNext()) {
+      if (iterator.hasNext()) {
         CSVRecord record = iterator.next();
         if (!record.isConsistent()) {
           LOGGER.warn("inconsistent record at position: " + position);
@@ -118,7 +116,7 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
 
   @Override
   public float getProgress() throws IOException {
-    return Math.min(1.0f, (float) position - start / (end - start));
+    return Math.min(1.0f, (float) position / length);
   }
 
   @Override

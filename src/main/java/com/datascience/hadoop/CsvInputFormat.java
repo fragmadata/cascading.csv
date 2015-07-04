@@ -22,7 +22,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.*;
+import org.apache.hadoop.io.compress.CodecPool;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.CompressionCodecFactory;
+import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.mapred.*;
 
 import java.io.IOException;
@@ -84,29 +87,14 @@ public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<T
     FileSystem fs = path.getFileSystem(conf);
     InputStream is = fs.open(path);
 
-    long start = split.getStart();
-    long end = split.getStart() + split.getLength();
-
     // If the input is compressed, load the compression codec.
     CompressionCodecFactory codecFactory = new CompressionCodecFactory(conf);
     CompressionCodec codec = codecFactory.getCodec(path);
     if (codec != null) {
-      // Get the codec decompressor and determine whether the decompressor is splittable. If the codec is splittable, calculate
-      // a split input stream. This is necessary because the compressed split will differ from the decompressed split.
       Decompressor decompressor = CodecPool.getDecompressor(codec);
-      if (codecFactory instanceof SplittableCompressionCodec) {
-        SplitCompressionInputStream cin = ((SplittableCompressionCodec) codec).createInputStream(is, decompressor, split.getStart(), split.getStart() + split.getLength(), SplittableCompressionCodec.READ_MODE.BYBLOCK);
-        start = cin.getAdjustedStart();
-        end = cin.getAdjustedEnd();
-        is = cin;
-      } else {
-        if (split.getStart() != 0) {
-          throw new IOException("Cannot seek in " + codec.getClass().getSimpleName() + " compressed stream");
-        }
-        is = codec.createInputStream(is, decompressor);
-      }
+      is = codec.createInputStream(is, decompressor);
     }
-    return new CsvRecordReader(is, createFormat(conf), start, end, conf.getBoolean(STRICT_MODE, true));
+    return new CsvRecordReader(is, createFormat(conf), split.getLength(), conf.getBoolean(STRICT_MODE, true));
   }
 
   /**
