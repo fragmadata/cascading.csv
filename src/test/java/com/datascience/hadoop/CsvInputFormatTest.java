@@ -18,7 +18,6 @@ package com.datascience.hadoop;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DFSClient;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ReflectionUtils;
@@ -63,20 +62,6 @@ public class CsvInputFormatTest {
     Path inputPath = new Path(inputFile.getAbsoluteFile().toURI().toString());
     FileSplit split = helper.createFileSplit(inputPath, 0, inputFile.length());
     assertTrue(helper.createRecordReader(format, split, jobConf) instanceof CsvRecordReader);
-  }
-
-  /**
-   * Tests to see if compressed files support seek.
-   */
-  @Test(expected = IOException.class)
-  public void nonSplittableCodecShouldNotSupportSeek() throws IOException {
-    CsvInputFormat format = ReflectionUtils.newInstance(CsvInputFormat.class, conf);
-
-    File inputFile = helper.getFile("/input/with-headers.txt.gz");
-    Path inputPath = new Path(inputFile.getAbsoluteFile().toURI().toString());
-
-    FileSplit split = helper.createFileSplit(inputPath, 10, 50);
-    helper.createRecordReader(format, split, jobConf);
   }
 
   /**
