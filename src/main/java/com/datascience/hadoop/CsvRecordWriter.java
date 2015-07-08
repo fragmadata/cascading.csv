@@ -23,8 +23,7 @@ import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 /**
  * CSV record writer.
@@ -39,8 +38,8 @@ import java.io.OutputStreamWriter;
 public class CsvRecordWriter implements RecordWriter<LongWritable, ListWritable<Text>> {
   private final CSVPrinter out;
 
-  public CsvRecordWriter(OutputStream os, CSVFormat format) throws IOException {
-    out = new CSVPrinter(new OutputStreamWriter(os), format);
+  public CsvRecordWriter(Writer writer, CSVFormat format) throws IOException {
+    out = new CSVPrinter(writer, format);
   }
 
   @Override

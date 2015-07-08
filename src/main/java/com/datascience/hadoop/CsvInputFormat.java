@@ -30,6 +30,9 @@ import org.apache.hadoop.mapred.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * CSV input format.
@@ -43,6 +46,7 @@ import java.io.InputStream;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<Text>> implements JobConfigurable {
+  public static final String CHARSET = "csv.charset";
   public static final String STRICT_MODE = "csv.strict";
   public static final String CSV_READER_COLUMNS = "csv.reader.columns";
   public static final String CSV_READER_SKIP_HEADER = "csv.reader.skip_header";
@@ -82,6 +86,9 @@ public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<T
 
   @Override
   public RecordReader<LongWritable, ListWritable<Text>> getRecordReader(InputSplit inputSplit, JobConf conf, Reporter reporter) throws IOException {
+    String charsetName = conf.get(CHARSET);
+    Charset charset = charsetName != null ? Charset.forName(charsetName) : StandardCharsets.UTF_8;
+
     FileSplit split = (FileSplit) inputSplit;
     Path path = split.getPath();
     FileSystem fs = path.getFileSystem(conf);
@@ -94,7 +101,7 @@ public class CsvInputFormat extends FileInputFormat<LongWritable, ListWritable<T
       Decompressor decompressor = CodecPool.getDecompressor(codec);
       is = codec.createInputStream(is, decompressor);
     }
-    return new CsvRecordReader(is, createFormat(conf), split.getLength(), conf.getBoolean(STRICT_MODE, true));
+    return new CsvRecordReader(new InputStreamReader(is, charset), createFormat(conf), split.getLength(), conf.getBoolean(STRICT_MODE, true));
   }
 
   /**
