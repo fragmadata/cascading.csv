@@ -24,8 +24,6 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Iterator;
 
@@ -51,11 +49,10 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   private final boolean strict;
   private long position;
 
-  public CsvRecordReader(InputStream is, CSVFormat format, long length, boolean strict) throws IOException {
+  public CsvRecordReader(Reader reader, CSVFormat format, long length, boolean strict) throws IOException {
     this.length = length;
     this.strict = strict;
-    Reader isr = new InputStreamReader(is);
-    parser = new CSVParser(isr, format);
+    parser = new CSVParser(reader, format);
     iterator = parser.iterator();
   }
 
