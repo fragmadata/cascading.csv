@@ -16,6 +16,9 @@
 package com.datascience.cascading.scheme;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -763,6 +766,60 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     this.format = format;
     this.charset = charset.name();
     this.strict = strict;
+  }
+
+  @Property(name = "delimiter", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The CSV field delimiter.")
+  public char getDelimiter() {
+    return format.getDelimiter();
+  }
+
+  @Property(name = "skipHeaderRecord", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Whether to skip the header record.")
+  public boolean getSkipHeaderRecord() {
+    return format.getSkipHeaderRecord();
+  }
+
+  @Property(name = "recordSeparator", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The record separator string.")
+  public String getRecordSeparator() {
+    return format.getRecordSeparator();
+  }
+
+  @Property(name = "quoteCharacter", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The quote character.")
+  public Character getQuoteCharacter() {
+    return format.getQuoteCharacter();
+  }
+
+  @Property(name = "quoteMode", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The quote mode.")
+  public String getQuoteMode() {
+    return format.getQuoteMode().name();
+  }
+
+  @Property(name = "escapeCharacter", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The escape character.")
+  public Character getEscapeCharacter() {
+    return format.getEscapeCharacter();
+  }
+
+  @Property(name = "ignoreSurroundingSpaces", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Whether to ignore spaces surrounding fields and records.")
+  public boolean isIgnoreSurroundingSpaces() {
+    return format.getIgnoreSurroundingSpaces();
+  }
+
+  @Property(name = "ignoreEmptyLines", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Whether to ignore empty lines.")
+  public boolean isIgnoreEmptyLines() {
+    return format.getIgnoreEmptyLines();
+  }
+
+  @Property(name = "nullString", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The string to convert to null.")
+  public String getNullString() {
+    return format.getNullString();
   }
 
   @Override
