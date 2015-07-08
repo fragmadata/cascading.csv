@@ -159,7 +159,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
-          <preparationGoals>exec:exec</preparationGoals>
+          <preparationGoals>exec:exec replacer:replace</preparationGoals>
         </configuration>
       </plugin>
       <plugin>
@@ -201,6 +201,26 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>replacer</artifactId>
+        <version>1.5.3</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>                   
+          </execution>
+        </executions>
+        <configuration>
+          <file>${basedir}/README.md</file>
+          <ignoreMissingFile>true</ignoreMissingFile>
+          <regex>true</regex>
+          <token>datascienceinc.github.io/cascading.csv/java/.*</token>
+          <value>datascienceinc.github.io/cascading.csv/java/${project.version})</value>
+        </configuration>
       </plugin>
     </plugins>
   </build>

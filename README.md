@@ -1,7 +1,7 @@
 # Cascading.CSV
 This project provides a simple CSV scheme for [Cascading](http://cascading.org) based on [Apache Commons CSV](https://commons.apache.org/proper/commons-csv/)
 
-#### [JavaDocs](http://datascienceinc.github.io/cascading.csv/java/0.1)
+#### [JavaDocs](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
 
 ## Rationale
 
@@ -14,11 +14,11 @@ formats in which delimited data is written.
 
 Cascading.CSV uses [Apache Commons CSV](https://commons.apache.org/proper/commons-csv/) for parsing CSV inputs and writing
 CSV outputs. In order to properly handle encoding, compression, and Hadoop input splits, this project implements a custom
-[CsvInputFormat](http://datascienceinc.github.io/cascading.csv/java/0.1/com/datascience/hadoop/CsvInputFormat.html)
-and [CsvOutputFormat](http://datascienceinc.github.io/cascading.csv/java/0.1/com/datascience/hadoop/CsvOutputFormat.html)
-along with an associated [RecordReader](http://datascienceinc.github.io/cascading.csv/java/0.1/com/datascience/hadoop/CsvRecordReader.html)
-and [RecordWriter](http://datascienceinc.github.io/cascading.csv/java/0.1/com/datascience/hadoop/CsvRecordWriter.html) respectively.
-Finally, the [CsvScheme](http://datascienceinc.github.io/cascading.csv/java/0.1/com/datascience/cascading/scheme/CsvScheme.html)
+[CsvInputFormat](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
+and [CsvOutputFormat](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
+along with an associated [RecordReader](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
+and [RecordWriter](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
+Finally, the [CsvScheme](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
 provides the interface for operating on CSV sources and sinks within Cascading. Of course, `CsvInputFormat` and
 `CsvOutputFormat` can certainly be used independently of Cascading as well.
 
@@ -69,7 +69,7 @@ For source schemes, if `skipHeaderRecord` is `true` and no fields are provided t
 and output fields will be automatically detected from the source data set. Header detection is performed by parsing only
 the first row of the source and using the first row's values as headers.
 
-See the [API documentation](http://datascienceinc.github.io/cascading.csv/java/0.1) for more information on specific
+See the [API documentation](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
 `CsvScheme` constructors.
 
 ### License
