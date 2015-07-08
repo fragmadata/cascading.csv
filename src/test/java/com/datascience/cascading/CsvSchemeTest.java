@@ -23,8 +23,10 @@ import cascading.pipe.Pipe;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
 import com.datascience.cascading.scheme.CsvScheme;
+import com.datascience.hadoop.CsvOutputFormat;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -32,9 +34,10 @@ import org.apache.hadoop.mapred.JobConf;
 import org.junit.After;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 
@@ -252,6 +255,202 @@ public class CsvSchemeTest {
 
     testScheme(sourcePath, sourceFormat, sinkPath, sinkFormat, expectedPath, true);
   }
+
+  /**
+   * Tests the Csv Scheme Generating Valid headers when not provided.
+   */
+  @Test
+  public void schemeGenerateHeadersWhenNotProvided() {
+
+
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-with-headers";
+
+    Set<String> expected = new HashSet<String>();
+    expected.addAll(Arrays.asList("id", "first name", "last name"));
+
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testSchemeFields(sourcePath,sourceFormat,sinkPath,sinkFormat,expected);
+
+  }
+
+  /**
+   * Test the CsvScheme generating positional headers names when not provided.
+   */
+  @Test
+  public void schemeGeneratePositionalFieldNames() {
+    String sourcePath = "src/test/resources/input/without-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-without-headers";
+
+    Set<String> expected = new HashSet<String>();
+    expected.addAll(Arrays.asList("col0", "col1", "col2"));
+
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withSkipHeaderRecord(false)
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testSchemeFields(sourcePath, sourceFormat, sinkPath, sinkFormat, expected);
+
+  }
+
+  /**
+   * Test CsvScheme generating Headers when header is defined in source format.
+   */
+  @Test
+  public void schemeGenerateFieldsWhenSouceFormatHeaderGiven(){
+    String sourcePath = "src/test/resources/input/without-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-without-headers";
+
+    Set<String> expected = new HashSet<String>();
+    expected.addAll(Arrays.asList("id", "first name", "last name"));
+
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name")
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    testSchemeFields(sourcePath,sourceFormat,sinkPath,sinkFormat,expected);
+
+
+  }
+
+  /**
+   * Test CsvScheme Generating headers when Source Fields are provided.
+   */
+  @Test
+  public void schemeGenerateFieldsWhenSouceFieldsGiven(){
+    String sourcePath = "src/test/resources/input/without-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-without-headers";
+
+    Set<String> expected = new HashSet<String>();
+    expected.addAll(Arrays.asList("id", "first name", "last name"));
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+
+    Fields sourceFields = new Fields("id", "first name", "last name");
+    Tap source = new Hfs(new CsvScheme(sourceFields, sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
+    Pipe pipe = new Pipe("pipe");
+
+    connector.connect(source, sink, pipe).complete();
+
+
+    Fields sinkFields = sink.getSinkFields();
+    for (int i = 0; i < sinkFields.size(); i++) {
+      assertTrue("Unexpected column "+sinkFields.get(i),expected.contains(sinkFields.get(i)));
+      expected.remove(sinkFields.get(i));
+    }
+
+    assertTrue("Not all expected values are found",expected.isEmpty());
+
+
+  }
+
+  @Test
+  public void schemeGeneratingHeadersWhenSourceHeadersAndFieldsAreGiven(){
+
+    String sourcePath = "src/test/resources/input/without-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-without-headers";
+
+    Set<String> expected = new HashSet<String>();
+    expected.addAll(Arrays.asList("id", "first name", "last name"));
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name")
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+
+    Fields sourceFields = new Fields("id", "first name", "last name");
+    Tap source = new Hfs(new CsvScheme(sourceFields, sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
+    Pipe pipe = new Pipe("pipe");
+
+    connector.connect(source, sink, pipe).complete();
+    String [] headers=sinkFormat.getHeader();
+
+
+    Fields sinkFields = sink.getSinkFields();
+    for (int i = 0; i < sinkFields.size(); i++) {
+      assertTrue("Unexpected column "+sinkFields.get(i),expected.contains(sinkFields.get(i)));
+      expected.remove(sinkFields.get(i));
+
+    }
+
+    assertTrue("Not all expected values are found",expected.isEmpty());
+
+
+
+  }
+
+  /**
+   *
+   * Helper method used for assertion of fields generated by CsvScheme.
+   */
+  private void testSchemeFields(String sourcePath, CSVFormat sourceFormat, String sinkPath,  CSVFormat sinkFormat, Set<String>expected){
+
+    Tap source = new Hfs(new CsvScheme(sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
+    Pipe pipe = new Pipe("pipe");
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    connector.connect(source, sink, pipe).complete();
+
+    Fields sinkFields = sink.getSinkFields();
+    for (int i = 0; i < sinkFields.size(); i++) {
+      assertTrue("Unexpected column "+sinkFields.get(i),expected.contains(sinkFields.get(i)));
+      expected.remove(sinkFields.get(i));
+
+    }
+    assertTrue("Not all expected values are found",expected.isEmpty());
+
+  }
+
 
   /**
    * Tests a source and sink scheme together.
