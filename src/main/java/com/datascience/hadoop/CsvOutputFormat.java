@@ -31,6 +31,9 @@ import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * CSV output format.
@@ -38,6 +41,7 @@ import java.io.IOException;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvOutputFormat extends FileOutputFormat<LongWritable, ListWritable<Text>> {
+  public static final String CHARSET = "csv.charset";
   public static final String CSV_WRITER_COLUMNS = "csv.writer.columns";
   public static final String CSV_WRITER_SKIP_HEADER = "csv.writer.skip_header";
   public static final String CSV_WRITER_DELIMITER = "csv.writer.delimiter";
@@ -61,6 +65,9 @@ public class CsvOutputFormat extends FileOutputFormat<LongWritable, ListWritable
 
   @Override
   public RecordWriter<LongWritable, ListWritable<Text>> getRecordWriter(FileSystem fileSystem, JobConf conf, String name, Progressable progress) throws IOException {
+    String charsetName = conf.get(CHARSET);
+    Charset charset = charsetName != null ? Charset.forName(charsetName) : StandardCharsets.UTF_8;
+
     Path path;
     if (FileOutputFormat.getCompressOutput(conf)) {
       Class<? extends CompressionCodec> codecClass = FileOutputFormat.getOutputCompressorClass(conf, GzipCodec.class);
@@ -69,7 +76,7 @@ public class CsvOutputFormat extends FileOutputFormat<LongWritable, ListWritable
     } else {
       path = FileOutputFormat.getTaskOutputPath(conf, name);
     }
-    return new CsvRecordWriter(path.getFileSystem(conf).create(path, progress), createFormat(conf));
+    return new CsvRecordWriter(new OutputStreamWriter(path.getFileSystem(conf).create(path, progress), charset), createFormat(conf));
   }
 
   /**

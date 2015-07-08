@@ -16,6 +16,9 @@
 package com.datascience.cascading.scheme;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -41,6 +44,8 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The CSV scheme provides support for parsing and formatting CSV files using
@@ -73,6 +78,22 @@ import java.io.IOException;
 public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]> {
   private final CSVFormat format;
   private final boolean strict;
+  private final String charset;
+
+  /**
+   * Creates a new CSV scheme with {@link org.apache.commons.csv.CSVFormat#DEFAULT}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
+   * <p>
+   * Note that because the default {@link org.apache.commons.csv.CSVFormat} does not specify a header record or skip the
+   * header record, this constructor will result in {@link cascading.tuple.Fields} being dynamically generated for sources.
+   * Source fields will be generated with positional names, e.g. {@code col1}, {@code col2}, {@code col3}, etc.
+   */
+  public CsvScheme() {
+    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, StandardCharsets.UTF_8, true);
+  }
 
   /**
    * Creates a new CSV scheme with {@link org.apache.commons.csv.CSVFormat#DEFAULT}.
@@ -82,13 +103,32 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * Note that because the default {@link org.apache.commons.csv.CSVFormat} does not specify a header record or skip the
    * header record, this constructor will result in {@link cascading.tuple.Fields} being dynamically generated for sources.
    * Source fields will be generated with positional names, e.g. {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param charset The name of the character set with which to read and write CSV files.
    */
-  public CsvScheme() {
-    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, true);
+  public CsvScheme(String charset) {
+    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, Charset.forName(charset), true);
+  }
+
+  /**
+   * Creates a new CSV scheme with {@link org.apache.commons.csv.CSVFormat#DEFAULT}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * Note that because the default {@link org.apache.commons.csv.CSVFormat} does not specify a header record or skip the
+   * header record, this constructor will result in {@link cascading.tuple.Fields} being dynamically generated for sources.
+   * Source fields will be generated with positional names, e.g. {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param charset The character set with which to read and write CSV files.
+   */
+  public CsvScheme(Charset charset) {
+    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, charset, true);
   }
 
   /**
    * Creates a new CSV scheme with the {@link org.apache.commons.csv.CSVFormat#DEFAULT} format.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
    * <p>
    * Note that because the default {@link org.apache.commons.csv.CSVFormat} does not specify a header record or skip the
    * header record, this constructor will result in {@link cascading.tuple.Fields} being dynamically generated for sources.
@@ -98,7 +138,57 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *               parse errors will be caught and logged.
    */
   public CsvScheme(boolean strict) {
-    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, strict);
+    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, StandardCharsets.UTF_8, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the {@link org.apache.commons.csv.CSVFormat#DEFAULT} format.
+   * <p>
+   * Note that because the default {@link org.apache.commons.csv.CSVFormat} does not specify a header record or skip the
+   * header record, this constructor will result in {@link cascading.tuple.Fields} being dynamically generated for sources.
+   * Source fields will be generated with positional names, e.g. {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param charset The name of the character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(String charset, boolean strict) {
+    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, Charset.forName(charset), strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the {@link org.apache.commons.csv.CSVFormat#DEFAULT} format.
+   * <p>
+   * Note that because the default {@link org.apache.commons.csv.CSVFormat} does not specify a header record or skip the
+   * header record, this constructor will result in {@link cascading.tuple.Fields} being dynamically generated for sources.
+   * Source fields will be generated with positional names, e.g. {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param charset The character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Charset charset, boolean strict) {
+    this(Fields.ALL, Fields.ALL, CSVFormat.DEFAULT, charset, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
+   * <p>
+   * When used as a source, if {@link org.apache.commons.csv.CSVFormat#getHeader()} is specified, the provided header
+   * column names will be used in the output {@link cascading.tuple.Fields}. If no headers are specified and
+   * {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()} is {@code true}, the scheme will attempt to automatically
+   * detect the header record from the first record in the CSV input. If {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()}
+   * is {@code false} and no header record is provided, positional {@link cascading.tuple.Fields} will be generated, e.g.
+   * {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param format The format with which to parse (source) or format (sink) records.
+   */
+  public CsvScheme(CSVFormat format) {
+    this(Fields.ALL, Fields.ALL, format, StandardCharsets.UTF_8, true);
   }
 
   /**
@@ -114,13 +204,35 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * {@code col1}, {@code col2}, {@code col3}, etc.
    *
    * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The name of the character set with which to read and write CSV files.
    */
-  public CsvScheme(CSVFormat format) {
-    this(Fields.ALL, Fields.ALL, format, true);
+  public CsvScheme(CSVFormat format, String charset) {
+    this(Fields.ALL, Fields.ALL, format, charset, true);
   }
 
   /**
    * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * When used as a source, if {@link org.apache.commons.csv.CSVFormat#getHeader()} is specified, the provided header
+   * column names will be used in the output {@link cascading.tuple.Fields}. If no headers are specified and
+   * {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()} is {@code true}, the scheme will attempt to automatically
+   * detect the header record from the first record in the CSV input. If {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()}
+   * is {@code false} and no header record is provided, positional {@link cascading.tuple.Fields} will be generated, e.g.
+   * {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param charset The character set with which to read and write CSV files.
+   * @param format The format with which to parse (source) or format (sink) records.
+   */
+  public CsvScheme(CSVFormat format, Charset charset) {
+    this(Fields.ALL, Fields.ALL, format, charset, true);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
    * <p>
    * When used as a source, if {@link org.apache.commons.csv.CSVFormat#getHeader()} is specified, the provided header
    * column names will be used in the output {@link cascading.tuple.Fields}. If no headers are specified and
@@ -134,7 +246,62 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *               parse errors will be caught and logged.
    */
   public CsvScheme(CSVFormat format, boolean strict) {
-    this(Fields.ALL, Fields.ALL, format, strict);
+    this(Fields.ALL, Fields.ALL, format, StandardCharsets.UTF_8, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
+   * <p>
+   * When used as a source, if {@link org.apache.commons.csv.CSVFormat#getHeader()} is specified, the provided header
+   * column names will be used in the output {@link cascading.tuple.Fields}. If no headers are specified and
+   * {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()} is {@code true}, the scheme will attempt to automatically
+   * detect the header record from the first record in the CSV input. If {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()}
+   * is {@code false} and no header record is provided, positional {@link cascading.tuple.Fields} will be generated, e.g.
+   * {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The name of the character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(CSVFormat format, String charset, boolean strict) {
+    this(Fields.ALL, Fields.ALL, format, Charset.forName(charset), strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
+   * <p>
+   * When used as a source, if {@link org.apache.commons.csv.CSVFormat#getHeader()} is specified, the provided header
+   * column names will be used in the output {@link cascading.tuple.Fields}. If no headers are specified and
+   * {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()} is {@code true}, the scheme will attempt to automatically
+   * detect the header record from the first record in the CSV input. If {@link org.apache.commons.csv.CSVFormat#getSkipHeaderRecord()}
+   * is {@code false} and no header record is provided, positional {@link cascading.tuple.Fields} will be generated, e.g.
+   * {@code col1}, {@code col2}, {@code col3}, etc.
+   *
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(CSVFormat format, Charset charset, boolean strict) {
+    this(Fields.ALL, Fields.ALL, format, charset, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param fields The source and sink fields.
+   */
+  public CsvScheme(Fields fields) {
+    this(fields, fields, CSVFormat.DEFAULT, StandardCharsets.UTF_8, true);
   }
 
   /**
@@ -147,13 +314,32 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * with the provided field names will be written to the output target.
    *
    * @param fields The source and sink fields.
+   * @param charset The name of the character set with which to read and write CSV files.
    */
-  public CsvScheme(Fields fields) {
-    this(fields, fields, CSVFormat.DEFAULT, true);
+  public CsvScheme(Fields fields, String charset) {
+    this(fields, fields, CSVFormat.DEFAULT, Charset.forName(charset), true);
   }
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param fields The source and sink fields.
+   * @param charset The character set with which to read and write CSV files.
+   */
+  public CsvScheme(Fields fields, Charset charset) {
+    this(fields, fields, CSVFormat.DEFAULT, charset, true);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
    * <p>
    * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
    * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
@@ -164,7 +350,62 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *               parse errors will be caught and logged.
    */
   public CsvScheme(Fields fields, boolean strict) {
-    this(fields, fields, CSVFormat.DEFAULT, strict);
+    this(fields, fields, CSVFormat.DEFAULT, StandardCharsets.UTF_8, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param fields The source and sink fields.
+   * @param charset The name of the character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields fields, String charset, boolean strict) {
+    this(fields, fields, CSVFormat.DEFAULT, Charset.forName(charset), strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param fields The source and sink fields.
+   * @param charset The character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields fields, Charset charset, boolean strict) {
+    this(fields, fields, CSVFormat.DEFAULT, charset, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record, the
+   * source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param fields The source and sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   */
+  public CsvScheme(Fields fields, CSVFormat format) {
+    this(fields, fields, format, StandardCharsets.UTF_8, true);
   }
 
   /**
@@ -183,14 +424,39 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *
    * @param fields The source and sink fields.
    * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The name of the character set with which to read and write CSV files.
    */
-  public CsvScheme(Fields fields, CSVFormat format) {
-    this(fields, fields, format, true);
+  public CsvScheme(Fields fields, CSVFormat format, String charset) {
+    this(fields, fields, format, Charset.forName(charset), true);
   }
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record, the
+   * source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param fields The source and sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The character set with which to read and write CSV files.
+   */
+  public CsvScheme(Fields fields, CSVFormat format, Charset charset) {
+    this(fields, fields, format, charset, true);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
    * <p>
    * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
    * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
@@ -206,7 +472,69 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *               parse errors will be caught and logged.
    */
   public CsvScheme(Fields fields, CSVFormat format, boolean strict) {
-    this(fields, fields, format, strict);
+    this(fields, fields, format, StandardCharsets.UTF_8, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record, the
+   * source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param fields The source and sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The name of the character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields fields, CSVFormat format, String charset, boolean strict) {
+    this(fields, fields, format, Charset.forName(charset), strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record, the
+   * source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param fields The source and sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields fields, CSVFormat format, Charset charset, boolean strict) {
+    this(fields, fields, format, charset, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields) {
+    this(sourceFields, sinkFields, CSVFormat.DEFAULT, StandardCharsets.UTF_8, true);
   }
 
   /**
@@ -220,13 +548,33 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *
    * @param sourceFields The source fields.
    * @param sinkFields The sink fields.
+   * @param charset The name of the character set with which to read and write CSV files.
    */
-  public CsvScheme(Fields sourceFields, Fields sinkFields) {
-    this(sourceFields, sinkFields, CSVFormat.DEFAULT, true);
+  public CsvScheme(Fields sourceFields, Fields sinkFields, String charset) {
+    this(sourceFields, sinkFields, CSVFormat.DEFAULT, Charset.forName(charset), true);
   }
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param charset The character set with which to read and write CSV files.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields, Charset charset) {
+    this(sourceFields, sinkFields, CSVFormat.DEFAULT, charset, true);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
    * <p>
    * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
    * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
@@ -238,7 +586,65 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *               parse errors will be caught and logged.
    */
   public CsvScheme(Fields sourceFields, Fields sinkFields, boolean strict) {
-    this(sourceFields, sinkFields, CSVFormat.DEFAULT, strict);
+    this(sourceFields, sinkFields, CSVFormat.DEFAULT, StandardCharsets.UTF_8, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param charset The name of the character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields, String charset, boolean strict) {
+    this(sourceFields, sinkFields, CSVFormat.DEFAULT, Charset.forName(charset), strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param charset The character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields, Charset charset, boolean strict) {
+    this(sourceFields, sinkFields, CSVFormat.DEFAULT, charset, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record,
+   * the source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format) {
+    this(sourceFields, sinkFields, format, StandardCharsets.UTF_8, true);
   }
 
   /**
@@ -258,14 +664,40 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * @param sourceFields The source fields.
    * @param sinkFields The sink fields.
    * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The name of the character set with which to read and write CSV files.
    */
-  public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format) {
-    this(sourceFields, sinkFields, format, true);
+  public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format, String charset) {
+    this(sourceFields, sinkFields, format, Charset.forName(charset), true);
   }
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
+   * <p>
+   * Strict mode is enabled when using this constructor.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record,
+   * the source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The character set with which to read and write CSV files.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format, Charset charset) {
+    this(sourceFields, sinkFields, format, charset, true);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The CSV input/output encoding set defaults to {@code UTF-8}
    * <p>
    * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
    * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
@@ -282,11 +714,112 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    *               parse errors will be caught and logged.
    */
   public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format, boolean strict) {
+    this(sourceFields, sinkFields, format, StandardCharsets.UTF_8, strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record,
+   * the source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The name of the character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format, String charset, boolean strict) {
+    this(sourceFields, sinkFields, format, Charset.forName(charset), strict);
+  }
+
+  /**
+   * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
+   * which to read and write CSV data.
+   * <p>
+   * The provided {@link cascading.tuple.Fields} will be used both in sourcing and sinking. For sources, this constructor
+   * assumes that the provided number of fields match the number of columns in the source data. For sinks, only columns
+   * with the provided field names will be written to the output target.
+   * <p>
+   * Note that regardless of whether the {@link org.apache.commons.csv.CSVFormat} provides a header record,
+   * the source {@link cascading.tuple.Fields} take precedence, and the header record configured in the format
+   * will be essentially ignored.
+   *
+   * @param sourceFields The source fields.
+   * @param sinkFields The sink fields.
+   * @param format The format with which to parse (source) or format (sink) records.
+   * @param charset The character set with which to read and write CSV files.
+   * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
+   *               parse errors will be caught and logged.
+   */
+  public CsvScheme(Fields sourceFields, Fields sinkFields, CSVFormat format, Charset charset, boolean strict) {
     super();
     setSourceFields(sourceFields);
     setSinkFields(sinkFields);
     this.format = format;
+    this.charset = charset.name();
     this.strict = strict;
+  }
+
+  @Property(name = "delimiter", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The CSV field delimiter.")
+  public char getDelimiter() {
+    return format.getDelimiter();
+  }
+
+  @Property(name = "skipHeaderRecord", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Whether to skip the header record.")
+  public boolean getSkipHeaderRecord() {
+    return format.getSkipHeaderRecord();
+  }
+
+  @Property(name = "recordSeparator", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The record separator string.")
+  public String getRecordSeparator() {
+    return format.getRecordSeparator();
+  }
+
+  @Property(name = "quoteCharacter", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The quote character.")
+  public Character getQuoteCharacter() {
+    return format.getQuoteCharacter();
+  }
+
+  @Property(name = "quoteMode", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The quote mode.")
+  public String getQuoteMode() {
+    return format.getQuoteMode().name();
+  }
+
+  @Property(name = "escapeCharacter", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The escape character.")
+  public Character getEscapeCharacter() {
+    return format.getEscapeCharacter();
+  }
+
+  @Property(name = "ignoreSurroundingSpaces", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Whether to ignore spaces surrounding fields and records.")
+  public boolean isIgnoreSurroundingSpaces() {
+    return format.getIgnoreSurroundingSpaces();
+  }
+
+  @Property(name = "ignoreEmptyLines", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Whether to ignore empty lines.")
+  public boolean isIgnoreEmptyLines() {
+    return format.getIgnoreEmptyLines();
+  }
+
+  @Property(name = "nullString", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The string to convert to null.")
+  public String getNullString() {
+    return format.getNullString();
   }
 
   @Override
@@ -405,6 +938,8 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * Configures the Hadoop configuration for the given CSV format.
    */
   private void configureReaderFormat(CSVFormat format, Configuration conf) {
+    conf.set(CsvOutputFormat.CHARSET, charset);
+
     // If the format header was explicitly provided by the user then forward it to the record reader. If skipHeaderRecord
     // is enabled then that indicates that field names were detected. We need to ensure that headers are defined in order
     // for the CSV reader to skip the header record.
@@ -446,6 +981,8 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * Configures the Hadoop configuration for the given CSV format.
    */
   private void configureWriterFormat(CSVFormat format, Configuration conf) {
+    conf.set(CsvOutputFormat.CHARSET, charset);
+
     // Apache CSV doesn't really handle the skipHeaderRecord flag correctly when writing output. If the skip flag is set
     // and headers are configured, headers will always be written to the output. Since we always have headers and/or
     // fields configured, we need to use the skipHeaderRecord flag to determine whether headers should be written.
