@@ -881,6 +881,8 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * Configures the Hadoop configuration for the given CSV format.
    */
   private void configureReaderFormat(CSVFormat format, Configuration conf) {
+    conf.set(CsvOutputFormat.CHARSET, charset);
+
     // If the format header was explicitly provided by the user then forward it to the record reader. If skipHeaderRecord
     // is enabled then that indicates that field names were detected. We need to ensure that headers are defined in order
     // for the CSV reader to skip the header record.
@@ -922,6 +924,8 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
    * Configures the Hadoop configuration for the given CSV format.
    */
   private void configureWriterFormat(CSVFormat format, Configuration conf) {
+    conf.set(CsvOutputFormat.CHARSET, charset);
+
     // Apache CSV doesn't really handle the skipHeaderRecord flag correctly when writing output. If the skip flag is set
     // and headers are configured, headers will always be written to the output. Since we always have headers and/or
     // fields configured, we need to use the skipHeaderRecord flag to determine whether headers should be written.
