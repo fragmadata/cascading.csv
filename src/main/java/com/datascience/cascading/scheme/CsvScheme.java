@@ -52,9 +52,9 @@ import java.util.Map;
 /**
  * The CSV scheme provides support for parsing and formatting CSV files using
  * <a href="https://commons.apache.org/proper/commons-csv/">Apache Commons CSV</a>.
- * <p/>
+ * <p>
  * This scheme is designed for use a source or a sink in a Hadoop MR2 flow.
- * <p/>
+ * <p>
  * To use the scheme, simply construct a new instance, passing either the {@link cascading.tuple.Fields} or a
  * {@link org.apache.commons.csv.CSVFormat} defining the structure of the CSV file.
  * <pre>
@@ -66,16 +66,16 @@ import java.util.Map;
  *     Tap tap = new Hfs(scheme, "hdfs://users.csv");
  *   }
  * </pre>
- * <p/>
+ * <p>
  * The CSV scheme changes its behavior according to the {@link cascading.tuple.Fields} or {@link org.apache.commons.csv.CSVFormat}
  * provided to the constructor.
- * <p/>
+ * <p>
  * For sources, this scheme detects headers and applies values to fields according to a set of rules based on the
  * arguments provided. Generally speaking, {@link org.apache.commons.csv.CSVFormat#getHeader() headers} define the columns
  * as they are present in the underlying CSV file, and {@link cascading.tuple.Fields} specify how those columns should
  * be presented to Cascading. The scheme may automatically detect CSV header information depending on the fields and
  * headers provided to this constructor.
- * <p/>
+ * <p>
  * Users can provided different combinations of {@link cascading.tuple.Fields} and {@link org.apache.commons.csv.CSVFormat#getHeader()}
  * values to control the input and output of the scheme. The rules that the scheme uses to resolve {@link cascading.tuple.Fields}
  * and {@link org.apache.commons.csv.CSVFormat#getHeader() headers} for sources are as follows:
@@ -128,9 +128,9 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with {@link org.apache.commons.csv.CSVFormat#DEFAULT}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @see com.datascience.cascading.scheme.CsvScheme
@@ -141,7 +141,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with {@link org.apache.commons.csv.CSVFormat#DEFAULT}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
    *
    * @param charset The character set with which to read and write CSV files.
@@ -153,7 +153,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the {@link org.apache.commons.csv.CSVFormat#DEFAULT} format.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param strict Indicates whether to parse records in strict parsing mode. When strict mode is disabled, single record
@@ -178,9 +178,9 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param format The format with which to parse (source) or format (sink) records.
@@ -192,7 +192,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
    *
    * @param charset The character set with which to read and write CSV files.
@@ -205,7 +205,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given {@link org.apache.commons.csv.CSVFormat}.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param format The format with which to parse (source) or format (sink) records.
@@ -232,9 +232,9 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param fields The source and sink fields.
@@ -246,7 +246,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
    *
    * @param fields  The source and sink fields.
@@ -259,7 +259,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param fields The source and sink fields.
@@ -287,9 +287,9 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param fields The source and sink fields.
@@ -303,7 +303,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
    *
    * @param fields  The source and sink fields.
@@ -318,7 +318,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param fields The source and sink fields.
@@ -348,9 +348,9 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param sourceFields The source fields.
@@ -363,7 +363,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
    *
    * @param sourceFields The source fields.
@@ -377,7 +377,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields}.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param sourceFields The source fields.
@@ -407,9 +407,9 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param sourceFields The source fields.
@@ -424,7 +424,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
-   * <p/>
+   * <p>
    * Strict mode is enabled when using this constructor.
    *
    * @param sourceFields The source fields.
@@ -440,7 +440,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   /**
    * Creates a new CSV scheme with the given source and sink {@link cascading.tuple.Fields} and a custom format with
    * which to read and write CSV data.
-   * <p/>
+   * <p>
    * The CSV input/output encoding set defaults to {@code UTF-8}
    *
    * @param sourceFields The source fields.
