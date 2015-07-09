@@ -863,9 +863,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   protected Fields detectHeader(FlowProcess<JobConf> flowProcess, Tap tap, boolean genericNames) {
     Tap textLine = new Hfs(new TextLine(new Fields("line")), tap.getFullIdentifier(flowProcess.getConfigCopy()));
 
-    try (TupleEntryIterator iterator = textLine.openForRead(flowProcess)) {
-      String line = iterator.next().getTuple().getString(0);
-      CSVRecord record = CSVParser.parse(line, format).iterator().next();
+      CSVRecord record = getHeaderRecord(flowProcess,tap);
       String[] fields = new String[record.size()];
       for (int i = 0; i < record.size(); i++) {
         if (genericNames) {
@@ -875,9 +873,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
         }
       }
       return new Fields(fields);
-    } catch (IOException e) {
-      throw new TapException(e);
-    }
+
   }
 
 
@@ -925,8 +921,6 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     } catch (IOException e) {
       throw new TapException(e);
     }
-
-
   }
 
   /**
