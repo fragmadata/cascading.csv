@@ -46,7 +46,9 @@ import org.apache.hadoop.mapred.RecordReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The CSV scheme provides support for parsing and formatting CSV files using
@@ -80,6 +82,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   private final CSVFormat format;
   private final boolean strict;
   private final String charset;
+  private Map<String, Integer> indices;
 
   /**
    * Creates a new CSV scheme with {@link org.apache.commons.csv.CSVFormat#DEFAULT}.
@@ -926,6 +929,17 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   }
 
+  /**
+   * Initializes header index info.
+   */
+  private void initIndices() {
+    if (format.getHeader() != null && format.getHeader().length > 0) {
+      indices = new HashMap<>();
+      for (int i = 0; i < format.getHeader().length; i++) {
+        indices.put(format.getHeader()[i], i);
+      }
+    }
+  }
 
   @Override
   public void sourceConfInit(FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap, JobConf conf) {
@@ -935,6 +949,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   @Override
   public void sourcePrepare(FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall) throws IOException {
+    initIndices();
     if (sourceCall.getContext() == null) {
       sourceCall.setContext(new Object[2]);
     }
@@ -952,8 +967,11 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
     TupleEntry entry = sourceCall.getIncomingEntry();
     ListWritable<Text> values = (ListWritable<Text>) context[1];
-    for (int i = 0; i < values.size(); i++) {
-      Text value = values.get(i);
+
+    Fields fields = getSourceFields();
+    for (int i = 0; i < fields.size(); i++) {
+      int index = indices != null ? indices.get(fields.get(i).toString()) : i;
+      Text value = values.get(index);
       if (value == null) {
         entry.setString(i, null);
       } else {
@@ -978,6 +996,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   @Override
   public void sinkPrepare(FlowProcess<JobConf> flowProcess, SinkCall<Object[], OutputCollector> sinkCall) throws IOException {
+    initIndices();
     sinkCall.setContext(new Object[2]);
     sinkCall.getContext()[0] = new LongWritable();
     sinkCall.getContext()[1] = new ListWritable<>(Text.class);
@@ -991,11 +1010,21 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
     TupleEntry entry = sinkCall.getOutgoingEntry();
     Tuple tuple = entry.getTuple();
-    for (Object value : tuple) {
-      if (value == null) {
-        record.add(null);
+
+    Fields fields = getSinkFields();
+    for (int i = 0; i < fields.size(); i++) {
+      int index = indices != null ? indices.get(fields.get(i).toString()) : i;
+      if (record.size() < index) {
+        for (int j = record.size() - 1; j <= index; j++) {
+          record.add(null);
+        }
+      }
+
+      Object value = tuple.getObject(i);
+      if (value != null) {
+        record.add(index, new Text(value.toString()));
       } else {
-        record.add(new Text(value.toString()));
+        record.add(index, null);
       }
     }
 
