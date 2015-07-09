@@ -408,14 +408,76 @@ public class CsvSchemeTest {
       .withRecordSeparator('\n');
 
 
-    Fields sourceFields = new Fields("id", "first name", "last name");
+    Fields sourceFields = new Fields("id", "last name", "first name");
 
     CsvScheme sourceScheme= new CsvScheme(sourceFields, sourceFormat);
     CsvScheme sinkScheme = new CsvScheme(sinkFormat);
 
     testSchemeFields(sourcePath, sourceScheme, sinkPath, sinkScheme, expected);
-    
+
   }
+
+  /**
+   * Tests if correct number of input headers are provided.
+   */
+  @Test(expected = RuntimeException.class)
+  public void headerCountMismatchColumnsTest(){
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-with-headers";
+
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name","phone")
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+
+    Tap source = new Hfs(new CsvScheme( sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
+    Pipe pipe = new Pipe("pipe");
+
+
+    connector.connect(source, sink, pipe).complete();
+
+  }
+
+  /**
+   * Tests if correct number of input fields are provided.
+   */
+  @Test(expected = RuntimeException.class)
+  public void fieldsCountMismatchColumnsTest(){
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-with-headers";
+
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    Fields sourceFields = new Fields("id", "last name", "first name","phone");
+    Tap source = new Hfs(new CsvScheme(sourceFields, sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
+    Pipe pipe = new Pipe("pipe");
+
+    connector.connect(source, sink, pipe).complete();
+
+  }
+
+
 
   /**
    *
@@ -434,7 +496,6 @@ public class CsvSchemeTest {
     for (int i = 0; i < sinkFields.size(); i++) {
       assertTrue("Unexpected column "+sinkFields.get(i),expected.contains(sinkFields.get(i)));
       expected.remove(sinkFields.get(i));
-
     }
     assertTrue("Not all expected values are found",expected.isEmpty());
 
