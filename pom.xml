@@ -208,7 +208,7 @@
         <version>1.5.3</version>
         <executions>
           <execution>
-            <phase>prepare-package</phase>
+            <phase>deploy</phase>
             <goals>
               <goal>replace</goal>
             </goals>                   
@@ -219,12 +219,12 @@
           <regex>true</regex>
           <replacements>
             <replacement>
-              <token>datascienceinc.github.io/cascading.csv/java/[\d][.][\d].{0,2}-{1}.*{0,1}\)</token>
-              <value>datascienceinc.github.io/cascading.csv/java/${project.version})</value>
+              <token>datascienceinc.github.io/.*/java/[\d][.][\d][\d]{0,2}-SNAPSHOT</token>
+              <value>datascienceinc.github.io/cascading.csv/java/${project.version}</value>
             </replacement>
             <replacement>
-              <token>datascienceinc.github.io/cascading.csv/java/[\d][.][\d].{0,2}\)</token>
-              <value>datascienceinc.github.io/cascading.csv/java/${project.version})</value>
+              <token>(datascienceinc.github.io/.*/java/(([\d][.][\d](?!\d))|([\d][.][\d][\d])))(?!-SNAPSHOT)</token>
+              <value>datascienceinc.github.io/cascading.csv/java/${project.version}</value>
             </replacement>
           </replacements>                        
         </configuration>
