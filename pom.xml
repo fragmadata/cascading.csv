@@ -216,10 +216,17 @@
         </executions>
         <configuration>
           <file>${basedir}/README.md</file>
-          <ignoreMissingFile>true</ignoreMissingFile>
           <regex>true</regex>
-          <token>datascienceinc.github.io/cascading.csv/java/.*</token>
-          <value>datascienceinc.github.io/cascading.csv/java/${project.version})</value>
+          <replacements>
+            <replacement>
+              <token>datascienceinc.github.io/cascading.csv/java/[\d][.][\d].{0,2}-{1}.*{0,1}\)</token>
+              <value>datascienceinc.github.io/cascading.csv/java/${project.version})</value>
+            </replacement>
+            <replacement>
+              <token>datascienceinc.github.io/cascading.csv/java/[\d][.][\d].{0,2}\)</token>
+              <value>datascienceinc.github.io/cascading.csv/java/${project.version})</value>
+            </replacement>
+          </replacements>                        
         </configuration>
       </plugin>
     </plugins>
