@@ -199,7 +199,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>${basedir}/bin/push-javadocs.sh</executable>
+              <executable>${project.basedir}/bin/push-javadocs.sh</executable>
             </configuration>
           </execution>
         </executions>
@@ -217,7 +217,7 @@
           </execution>
         </executions>
         <configuration>
-          <file>${basedir}/README.md</file>
+          <file>${project.basedir}/README.md</file>
           <regex>true</regex>
           <replacements>
             <replacement>
