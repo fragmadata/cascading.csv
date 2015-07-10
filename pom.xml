@@ -20,6 +20,8 @@
 
     <!--Dependency versions-->
     <cascading.version>2.6.3</cascading.version>
+    <cascading.version.major>2</cascading.version.major>
+    <cascading.version.minor>6</cascading.version.minor>
     <hadoop.version>2.6.0</hadoop.version>
     <commons.csv.version>1.1</commons.csv.version>
     <junit.version>4.12</junit.version>
@@ -159,6 +161,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+          <preparationGoals>exec:exec replacer:replace</preparationGoals>
         </configuration>
       </plugin>
       <plugin>
@@ -183,6 +186,49 @@
               <followSymlinks>false</followSymlinks>
             </fileset>
           </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>exec-maven-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <version>1.4.0</version>
+        <executions>
+          <execution>
+            <id>default-cli</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/bin/push-javadocs.sh</executable>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>replacer</artifactId>
+        <version>1.5.3</version>
+        <executions>
+          <execution>
+            <phase>deploy</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>                   
+          </execution>
+        </executions>
+        <configuration>
+          <file>${basedir}/README.md</file>
+          <regex>true</regex>
+          <replacements>
+            <replacement>
+              <token>datascienceinc.github.io/.*/[\d][.][\d][\d]{0,2}-SNAPSHOT</token>
+              <value>datascienceinc.github.io/cascading.csv/${project.version}</value>
+            </replacement>
+            <replacement>
+              <token>(datascienceinc.github.io/.*/(([\d][.][\d](?!\d))|([\d][.][\d][\d])))(?!-SNAPSHOT)</token>
+              <value>datascienceinc.github.io/cascading.csv/${project.version}</value>
+            </replacement>
+          </replacements>                        
         </configuration>
       </plugin>
     </plugins>
@@ -218,7 +264,11 @@
             <configuration>
               <show>public</show>
               <reportOutputDirectory>docs</reportOutputDirectory>
-              <destDir>java/${project.version}</destDir>
+              <destDir>${project.version}</destDir>
+              <links>
+                <link>http://commons.apache.org/csv/apidocs/</link>
+                <link>http://docs.cascading.org/cascading/${cascading.version.major}.${cascading.version.minor}/javadoc/cascading-core/</link>
+              </links>
             </configuration>
             <executions>
               <execution>
