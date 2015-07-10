@@ -20,8 +20,8 @@
 
     <!--Dependency versions-->
     <cascading.version>2.6.3</cascading.version>
-    <cascading.version.major>2</cascading.version>
-    <cascading.version.minor>6</cascading.version>
+    <cascading.version.major>2</cascading.version.major>
+    <cascading.version.minor>6</cascading.version.minor>
     <hadoop.version>2.6.0</hadoop.version>
     <commons.csv.version>1.1</commons.csv.version>
     <junit.version>4.12</junit.version>
