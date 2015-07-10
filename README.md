@@ -1,7 +1,9 @@
 # Cascading.CSV
+[![Build Status](https://travis-ci.org/datascienceinc/cascading.csv.png)](https://travis-ci.org/datascienceinc/cascading.csv)
+
 This project provides a simple CSV scheme for [Cascading](http://cascading.org) based on [Apache Commons CSV](https://commons.apache.org/proper/commons-csv/)
 
-#### [JavaDocs](http://datascienceinc.github.io/cascading.csv/java/0.1)
+#### [JavaDocs](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
 
 ## Rationale
 
@@ -69,7 +71,7 @@ For source schemes, if `skipHeaderRecord` is `true` and no fields are provided t
 and output fields will be automatically detected from the source data set. Header detection is performed by parsing only
 the first row of the source and using the first row's values as headers.
 
-See the [API documentation](http://datascienceinc.github.io/cascading.csv/java/0.1) for more information on specific
+See the [API documentation](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT) for more information on specific
 `CsvScheme` constructors.
 
 ### License
