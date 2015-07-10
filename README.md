@@ -1,4 +1,6 @@
 # Cascading.CSV
+[![Build Status](https://travis-ci.org/datascienceinc/cascading.csv.png)](https://travis-ci.org/datascienceinc/cascading.csv)
+
 This project provides a simple CSV scheme for [Cascading](http://cascading.org) based on [Apache Commons CSV](https://commons.apache.org/proper/commons-csv/)
 
 #### [JavaDocs](http://datascienceinc.github.io/cascading.csv/java/0.2-SNAPSHOT)
