@@ -264,7 +264,7 @@
             <configuration>
               <show>public</show>
               <reportOutputDirectory>docs</reportOutputDirectory>
-              <destDir>java/${project.version}</destDir>
+              <destDir>${project.version}</destDir>
               <links>
                 <link>http://commons.apache.org/csv/apidocs/</link>
                 <link>http://docs.cascading.org/cascading/${cascading.version.major}.${cascading.version.minor}/javadoc/cascading-core/</link>
