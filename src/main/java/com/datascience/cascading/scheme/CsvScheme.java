@@ -46,8 +46,7 @@ import org.apache.hadoop.mapred.RecordReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The CSV scheme provides support for parsing and formatting CSV files using
@@ -827,30 +826,35 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   @Override
   public Fields retrieveSourceFields(FlowProcess<JobConf> flowProcess, Tap tap) {
+    Fields fields = getSourceFields();
 
 
-    if (!getSourceFields().isUnknown()) {
-      Fields sourceFields = getSourceFields();
+    if (fields.isUnknown() && format.getHeader() == null && format.getSkipHeaderRecord()) {
+      setSourceFields(detectHeader(flowProcess, tap, false));
+    } else if (fields.isUnknown() && format.getHeader() == null && !format.getSkipHeaderRecord()) {
+      setSourceFields(detectHeader(flowProcess, tap, true));
+    } else if (!fields.isUnknown() && format.getHeader() == null && format.getSkipHeaderRecord()) {
 
-      if (validateFields(flowProcess, tap, sourceFields)) {
-        return sourceFields;
-      } else {
-        throw new RuntimeException("Fields count don't match column count in input file");
+      if (detectHeader(flowProcess, tap, false).compareTo(fields) != 0) {
+        throw new RuntimeException("Fields don't match header columns");
+      }
+    } else if (!fields.isUnknown() && format.getHeader() != null && !format.getSkipHeaderRecord()) {
+      if (fields.size() != format.getHeader().length) {
+        throw new RuntimeException("Fields count don't match header count");
+      }
+    } else if (!fields.isUnknown() && format.getHeader() != null) {
+      if (!(validateFields(flowProcess, tap, fields) && validateFieldsAndHeaders(fields, Arrays.asList(format.getHeader())))) {
+        throw new RuntimeException("Headers count don't match column count in input file");
       }
 
-    }
-
-
-    if (format.getSkipHeaderRecord() && format.getHeader() == null) {
-      setSourceFields(detectHeader(flowProcess, tap, false));
-    } else if (format.getHeader() != null) {
+    } else if (fields.isUnknown() && format.getHeader() != null) {
       if (validateHeaders(flowProcess, tap)) {
+
         setSourceFields(new Fields(format.getHeader()));
+
       } else {
         throw new RuntimeException("Headers count don't match column count in input file");
       }
-    } else {
-      setSourceFields(detectHeader(flowProcess, tap, true));
     }
     return getSourceFields();
   }
@@ -862,16 +866,16 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   protected Fields detectHeader(FlowProcess<JobConf> flowProcess, Tap tap, boolean genericNames) {
     Tap textLine = new Hfs(new TextLine(new Fields("line")), tap.getFullIdentifier(flowProcess.getConfigCopy()));
 
-      CSVRecord record = getHeaderRecord(flowProcess,tap);
-      String[] fields = new String[record.size()];
-      for (int i = 0; i < record.size(); i++) {
-        if (genericNames) {
-          fields[i] = String.format("col%d", i);
-        } else {
-          fields[i] = record.get(i);
-        }
+    CSVRecord record = getHeaderRecord(flowProcess, tap);
+    String[] fields = new String[record.size()];
+    for (int i = 0; i < record.size(); i++) {
+      if (genericNames) {
+        fields[i] = String.format("col%d", i);
+      } else {
+        fields[i] = record.get(i);
       }
-      return new Fields(fields);
+    }
+    return new Fields(fields);
 
   }
 
@@ -887,18 +891,34 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     return false;
   }
 
+  protected boolean validateFieldsAndHeaders(Fields fields, List<String> headersList) {
+    if (headersList.size() != fields.size()) {
+      return false;
+    }
+    for (int i = 0; i < fields.size(); i++) {
+      if (!headersList.contains(fields.get(i))) {
+        return false;
+      }
+    }
+    return true;
+
+
+  }
+
   /**
    * Method to validate if input file has same number of columns as Fields passed..
    */
   protected boolean validateFields(FlowProcess<JobConf> flowProcess, Tap tap, Fields sourceFields) {
 
     CSVRecord headerRecord = getHeaderRecord(flowProcess, tap);
+
     if (headerRecord.size() == sourceFields.size()) {
       return true;
     }
     return false;
 
   }
+
 
   /**
    * Method to read the header record from the source file.

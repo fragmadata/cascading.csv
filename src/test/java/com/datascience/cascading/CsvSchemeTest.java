@@ -37,6 +37,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertTrue;
@@ -354,7 +355,7 @@ public class CsvSchemeTest {
    */
   @Test
   public void schemeGenerateFieldsWhenSouceFieldsGiven(){
-    String sourcePath = "src/test/resources/input/without-headers.txt";
+    String sourcePath = "src/test/resources/input/with-headers.txt";
     String sinkPath = "src/test/resources/output/sink-without-headers";
 
     Set<String> expected = new HashSet<String>();
@@ -451,7 +452,7 @@ public class CsvSchemeTest {
   /**
    * Tests if correct number of input fields are provided.
    */
-  @Test(expected = RuntimeException.class)
+  @Test(expected=RuntimeException.class)
   public void fieldsCountMismatchColumnsTest(){
     String sourcePath = "src/test/resources/input/with-headers.txt";
     String sinkPath = "src/test/resources/output/sink-with-headers";
@@ -477,6 +478,44 @@ public class CsvSchemeTest {
 
   }
 
+  @Test
+  public void testWhenFieldsAndHeadersAreinDifferentOrder() throws Exception{
+
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-with-headers";
+    String expectedPath = "src/test/resources/expected/with-headers-difforder.txt";
+
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+      .withQuote('"')
+      .withHeader("id", "first name", "last name")
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
+
+
+    Fields sourceFields = new Fields("id","last name", "first name");
+
+
+
+    Tap source = new Hfs(new CsvScheme(sourceFields,sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
+
+    Pipe pipe = new Pipe("pipe");
+
+    connector.connect(source, sink, pipe).complete();
+
+    testPaths(sinkPath, expectedPath);
+
+
+
+
+  }
 
 
   /**
@@ -492,7 +531,10 @@ public class CsvSchemeTest {
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     connector.connect(source, sink, pipe).complete();
 
+
+
     Fields sinkFields = sink.getSinkFields();
+    Fields sourceFields = source.getSourceFields();
     for (int i = 0; i < sinkFields.size(); i++) {
       assertTrue("Unexpected column "+sinkFields.get(i),expected.contains(sinkFields.get(i)));
       expected.remove(sinkFields.get(i));
