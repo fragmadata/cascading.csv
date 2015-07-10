@@ -221,12 +221,12 @@
           <regex>true</regex>
           <replacements>
             <replacement>
-              <token>datascienceinc.github.io/.*/java/[\d][.][\d][\d]{0,2}-SNAPSHOT</token>
-              <value>datascienceinc.github.io/cascading.csv/java/${project.version}</value>
+              <token>datascienceinc.github.io/.*/[\d][.][\d][\d]{0,2}-SNAPSHOT</token>
+              <value>datascienceinc.github.io/cascading.csv/${project.version}</value>
             </replacement>
             <replacement>
-              <token>(datascienceinc.github.io/.*/java/(([\d][.][\d](?!\d))|([\d][.][\d][\d])))(?!-SNAPSHOT)</token>
-              <value>datascienceinc.github.io/cascading.csv/java/${project.version}</value>
+              <token>(datascienceinc.github.io/.*/(([\d][.][\d](?!\d))|([\d][.][\d][\d])))(?!-SNAPSHOT)</token>
+              <value>datascienceinc.github.io/cascading.csv/${project.version}</value>
             </replacement>
           </replacements>                        
         </configuration>
