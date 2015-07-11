@@ -416,7 +416,7 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    Fields sourceFields = new Fields("id", "last name", "first name");
+    Fields sourceFields = new Fields("id", "first name","last name");
 
     CsvScheme sourceScheme= new CsvScheme(sourceFields, sourceFormat);
     CsvScheme sinkScheme = new CsvScheme(sinkFormat);
