@@ -758,7 +758,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     for (int i = 0; i < fields.size(); i++) {
       int index = indices != null ? indices.get(fields.get(i).toString()) : i;
       if (record.size() < index) {
-        for (int j = record.size() - 1; j <= index; j++) {
+        for (int j = record.size(); j < index; j++) {
           record.add(null);
         }
       }
