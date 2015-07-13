@@ -199,7 +199,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>${project.basedir}/bin/push-javadocs.sh</executable>
+              <executable>${project.basedir}/bin/push-javadoc.sh</executable>
             </configuration>
           </execution>
         </executions>
@@ -251,7 +251,6 @@
       </plugin>
     </plugins>
   </reporting>
-
   <profiles>
     <profile>
       <id>javadoc</id>
