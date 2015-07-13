@@ -10,4 +10,4 @@ branches:
   - master
 after_success:
   - echo "<settings><servers><server><id>conjars.org</id><username>${conjarUser}</username><password>${conjarPassword}</password></server></servers></settings>" > ~/settings.xml
-  - mvn deploy --settings ~/settings.xml
+  - mvn deploy -DskipTests --settings ~/settings.xml
