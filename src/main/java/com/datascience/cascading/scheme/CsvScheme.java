@@ -659,14 +659,12 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
   private CSVRecord getHeaderRecord(FlowProcess<JobConf> flowProcess, Tap tap) {
     Tap textLine = new Hfs(new TextLine(new Fields("line")), tap.getFullIdentifier(flowProcess.getConfigCopy()));
 
-    try {
-      TupleEntryIterator iterator = textLine.openForRead(flowProcess);
+    try (TupleEntryIterator iterator = textLine.openForRead(flowProcess)) {
       String line = iterator.next().getTuple().getString(0);
       boolean skipHeaderRecord = format.getSkipHeaderRecord();
       CSVRecord headerRecord = CSVParser.parse(line, format.withSkipHeaderRecord(false)).iterator().next();
       format.withSkipHeaderRecord(skipHeaderRecord);
       return headerRecord;
-
     } catch (IOException e) {
       throw new TapException(e);
     }
