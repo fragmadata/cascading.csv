@@ -15,6 +15,7 @@
  */
 package com.datascience.cascading.scheme;
 
+import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import org.apache.log4j.Logger;
 
 /**
  * The CSV scheme provides support for parsing and formatting CSV files using
@@ -120,6 +122,7 @@ import java.util.*;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]> {
+  private static final Logger LOGGER = Logger.getLogger(CsvScheme.class);
   private final CSVFormat format;
   private final boolean strict;
   private final String charset;
@@ -710,6 +713,16 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     ListWritable<Text> values = (ListWritable<Text>) context[1];
 
     Fields fields = getSourceFields();
+    if (fields.size() != values.size()) {
+//      LongWritable pos = (LongWritable) context[0];
+//      Long position = pos.get();
+      LOGGER.warn("failed to parse record, columns and values don't match at line: "   );
+      if (strict) {
+        throw new FlowException();
+      } else {
+        return false;
+      }
+    }
     for (int i = 0; i < fields.size(); i++) {
       int index = indices != null ? indices.get(fields.get(i).toString()) : i;
       Text value = values.get(index);
