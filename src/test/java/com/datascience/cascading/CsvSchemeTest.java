@@ -527,6 +527,7 @@ public class CsvSchemeTest {
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
       .withQuote('"')
+      .withHeader("id", "first name", "last name","city","zip")
       .withEscape('\\')
       .withRecordSeparator('\n');
 

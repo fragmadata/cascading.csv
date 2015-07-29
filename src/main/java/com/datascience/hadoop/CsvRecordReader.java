@@ -48,12 +48,14 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   private final long length;
   private final boolean strict;
   private long position;
+  private int headerLength;
 
   public CsvRecordReader(Reader reader, CSVFormat format, long length, boolean strict) throws IOException {
     this.length = length;
     this.strict = strict;
     parser = new CSVParser(reader, format);
     iterator = parser.iterator();
+    headerLength = format.getHeader().length;
   }
 
   @Override
@@ -68,6 +70,7 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
         }
 
         key.set(record.getRecordNumber());
+
         for (int i = 0; i < record.size(); i++) {
           String item = record.get(i);
           if (item == null) {

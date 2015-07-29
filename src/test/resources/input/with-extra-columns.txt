@@ -1,7 +1,7 @@
 id	first name	last name	city	zip
-1	Jordan	Halterman
-2	Tom	Hummel
+1	Jordan	Halterman	sandiego	90777
+2	Tom	Hummel	LosAngeles	906779
 3	Harrison	Cavarallo
-4	Badar	Ahmed	Santa Monica
-5	Tristan	Reid	San Fernando
-6	Mark	McKelvy	El Segundo
+4	Badar	Ahmed	Santa Monica	9999
+5	Tristan	Reid	San Fernando	9999
+6	Mark	McKelvy	El Segundo	99999

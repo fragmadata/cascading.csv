@@ -710,17 +710,19 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     }
 
     TupleEntry entry = sourceCall.getIncomingEntry();
+
     ListWritable<Text> values = (ListWritable<Text>) context[1];
 
     Fields fields = getSourceFields();
     if (fields.size() != values.size()) {
-//      LongWritable pos = (LongWritable) context[0];
-//      Long position = pos.get();
+      LongWritable pos = (LongWritable) context[0];
+      Long position = pos.get();
+      System.out.println("position"+position);
       LOGGER.warn("failed to parse record, columns and values don't match at line: "   );
       if (strict) {
         throw new FlowException();
       } else {
-        return false;
+        return true;
       }
     }
     for (int i = 0; i < fields.size(); i++) {
