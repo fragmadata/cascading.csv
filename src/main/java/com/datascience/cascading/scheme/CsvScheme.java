@@ -717,7 +717,6 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     if (fields.size() != values.size()) {
       LongWritable pos = (LongWritable) context[0];
       Long position = pos.get();
-      System.out.println("position"+position);
       LOGGER.warn("failed to parse record, columns and values don't match at line: "   );
       if (strict) {
         throw new FlowException();

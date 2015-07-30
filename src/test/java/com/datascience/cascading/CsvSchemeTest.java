@@ -527,7 +527,7 @@ public class CsvSchemeTest {
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
       .withQuote('"')
-      .withHeader("id", "first name", "last name","city","zip")
+      .withHeader("id", "first name", "last name", "city", "zip")
       .withEscape('\\')
       .withRecordSeparator('\n');
 
@@ -535,8 +535,6 @@ public class CsvSchemeTest {
       .withSkipHeaderRecord()
       .withEscape('\\')
       .withRecordSeparator('\n');
-
-    Fields sourceFields = new Fields("id","last name", "first name");
 
     Tap source = new Hfs(new CsvScheme(sourceFormat,false), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
