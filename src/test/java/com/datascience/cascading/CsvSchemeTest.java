@@ -553,16 +553,62 @@ public class CsvSchemeTest {
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
+            .withHeader("id", "first name", "last name", "city", "zip")
             .withQuote('"')
             .withEscape('\\')
             .withRecordSeparator('\n');
 
     CSVFormat sinkFormat = CSVFormat.newFormat('\t')
-            .withSkipHeaderRecord()
             .withEscape('\\')
             .withRecordSeparator('\n');
 
-    Fields sourceFields = new Fields("id","last name", "first name");
+    Tap source = new Hfs(new CsvScheme(sourceFormat,true), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
+
+    Pipe pipe = new Pipe("pipe");
+
+    connector.connect(source, sink, pipe).complete();
+  }
+
+  @Test
+  public void testWhenExtraColumnsNotStrictNoHeaders() throws Exception{
+    String sourcePath = "src/test/resources/input/with-extra-columns-no-header.txt";
+    String sinkPath = "src/test/resources/input/sink-no-headers";
+    String expectedPath = "src/test/resources/expected/with-extra-columns-no-strict-no-header.txt";
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat('\t')
+            .withQuote('"')
+            .withEscape('\\')
+            .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+            .withEscape('\\')
+            .withRecordSeparator('\n');
+
+    Tap source = new Hfs(new CsvScheme(sourceFormat,false), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
+
+    Pipe pipe = new Pipe("pipe");
+
+    connector.connect(source, sink, pipe).complete();
+    testPaths(sinkPath, expectedPath);
+  }
+
+  @Test(expected=FlowException.class)
+  public void testWhenExtraColumnsStrictNoHeaders() throws Exception{
+    String sourcePath = "src/test/resources/input/with-extra-columns-no-header.txt";
+    String sinkPath = "src/test/resources/input/sink-no-headers";
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat('\t')
+            .withQuote('"')
+            .withEscape('\\')
+            .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+            .withEscape('\\')
+            .withRecordSeparator('\n');
 
     Tap source = new Hfs(new CsvScheme(sourceFormat,true), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);

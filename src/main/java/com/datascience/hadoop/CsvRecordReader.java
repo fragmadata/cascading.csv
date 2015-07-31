@@ -15,6 +15,8 @@
  */
 package com.datascience.hadoop;
 
+import cascading.tap.TapException;
+import com.datascience.util.CsvParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -48,12 +50,18 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   private final long length;
   private final boolean strict;
   private long position;
+  private Integer colLength;
 
   public CsvRecordReader(Reader reader, CSVFormat format, long length, boolean strict) throws IOException {
     this.length = length;
     this.strict = strict;
     parser = new CSVParser(reader, format);
     iterator = parser.iterator();
+    if (parser.getHeaderMap() == null) {
+      colLength = null;
+    } else {
+      colLength = parser.getHeaderMap().size();
+    }
   }
 
   @Override
@@ -62,9 +70,16 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
     try {
       if (iterator.hasNext()) {
         CSVRecord record = iterator.next();
-        if (!record.isConsistent()) {
-          LOGGER.warn("inconsistent record at position: " + position);
-          return next(key, value);
+        colLength = colLength == null ? record.size() : colLength;
+        if (!record.isConsistent() || record.size() != colLength) {
+          try {
+            String message = String.format("%s: %s", "inconsistent record at position", position);
+            if (strict)
+              throw new CsvParseException(message);
+            return next(key, value);
+          } catch(CsvParseException e) {
+            throw new TapException(e);
+          }
         }
 
         key.set(record.getRecordNumber());
