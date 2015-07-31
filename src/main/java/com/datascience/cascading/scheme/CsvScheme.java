@@ -34,6 +34,7 @@ import cascading.tuple.TupleEntryIterator;
 import com.datascience.hadoop.CsvInputFormat;
 import com.datascience.hadoop.CsvOutputFormat;
 import com.datascience.hadoop.ListWritable;
+import com.datascience.util.CsvParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -714,14 +715,19 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     ListWritable<Text> values = (ListWritable<Text>) context[1];
 
     Fields fields = getSourceFields();
-    if (fields.size() != values.size()) {
-      LongWritable pos = (LongWritable) context[0];
-      Long position = pos.get();
-      LOGGER.warn("failed to parse record, columns and values don't match at line: "   );
-      if (strict) {
-        throw new FlowException();
-      } else {
-        return true;
+    if ((format.getHeader() != null) && !areFieldsInFormatHeaders(fields) ) {
+      try {
+        LongWritable pos = (LongWritable) context[0];
+        Long position = pos.get();
+        String message = String.format("%s: %s", "Failed to parse record. fields not in header record at position: ", position);
+        LOGGER.warn(message);
+        if (strict) {
+          throw new CsvParseException(message);
+        } else {
+          return true;
+        }
+      } catch (CsvParseException e) {
+        throw new TapException(e);
       }
     }
     for (int i = 0; i < fields.size(); i++) {
