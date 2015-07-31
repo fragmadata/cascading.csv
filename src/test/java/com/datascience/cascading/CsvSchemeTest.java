@@ -461,7 +461,7 @@ public class CsvSchemeTest {
    * Tests if correct number of input fields are provided.
    */
   @Test(expected=RuntimeException.class)
-  public void fieldsCountMismatchColumnsTest(){
+  public void fieldsCountGreaterThanColumnsTest(){
 
     String sourcePath = "src/test/resources/input/with-headers.txt";
     String sinkPath = "src/test/resources/output/sink-with-headers";
@@ -483,6 +483,39 @@ public class CsvSchemeTest {
     Pipe pipe = new Pipe("pipe");
 
     connector.connect(source, sink, pipe).complete();
+
+  }
+
+  /**
+   * Tests if subset of input fields are provided, properly outputs only that subset.
+   */
+  @Test
+  public void fieldsIncludedButNotMatchLengthTest() throws Exception {
+
+    String sourcePath = "src/test/resources/input/with-headers.txt";
+    String sinkPath = "src/test/resources/output/sink-with-headers";
+    String expectedPath = "src/test/resources/expected/sink-with-headers-id-only.txt";
+
+    FlowConnector connector = new Hadoop2MR1FlowConnector();
+    CSVFormat sourceFormat = CSVFormat.newFormat(',')
+            .withHeader("id","first name", "last name")
+            .withQuote('"')
+            .withEscape('\\')
+            .withRecordSeparator('\n');
+
+    CSVFormat sinkFormat = CSVFormat.newFormat('\t')
+            .withSkipHeaderRecord()
+            .withEscape('\\')
+            .withRecordSeparator('\n');
+
+    Fields sourceFields = new Fields("id");
+    Tap source = new Hfs(new CsvScheme(sourceFields, sourceFormat), sourcePath);
+    Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
+    Pipe pipe = new Pipe("pipe");
+
+    connector.connect(source, sink, pipe).complete();
+
+    testPaths(sinkPath, expectedPath);
 
   }
 
