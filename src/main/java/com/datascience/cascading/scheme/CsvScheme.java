@@ -15,6 +15,7 @@
  */
 package com.datascience.cascading.scheme;
 
+import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
@@ -33,6 +34,7 @@ import cascading.tuple.TupleEntryIterator;
 import com.datascience.hadoop.CsvInputFormat;
 import com.datascience.hadoop.CsvOutputFormat;
 import com.datascience.hadoop.ListWritable;
+import com.datascience.util.CsvParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -47,6 +49,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import org.apache.log4j.Logger;
 
 /**
  * The CSV scheme provides support for parsing and formatting CSV files using
@@ -120,6 +123,7 @@ import java.util.*;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]> {
+  private static final Logger LOGGER = Logger.getLogger(CsvScheme.class);
   private final CSVFormat format;
   private final boolean strict;
   private final String charset;
@@ -707,9 +711,25 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     }
 
     TupleEntry entry = sourceCall.getIncomingEntry();
+
     ListWritable<Text> values = (ListWritable<Text>) context[1];
 
     Fields fields = getSourceFields();
+    if ((format.getHeader() != null) && !areFieldsInFormatHeaders(fields) ) {
+      try {
+        LongWritable pos = (LongWritable) context[0];
+        Long position = pos.get();
+        String message = String.format("%s: %s", "Failed to parse record. fields not in header record at position: ", position);
+        LOGGER.warn(message);
+        if (strict) {
+          throw new CsvParseException(message);
+        } else {
+          return true;
+        }
+      } catch (CsvParseException e) {
+        throw new TapException(e);
+      }
+    }
     for (int i = 0; i < fields.size(); i++) {
       int index = indices != null ? indices.get(fields.get(i).toString()) : i;
       Text value = values.get(index);
