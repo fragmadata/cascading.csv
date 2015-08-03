@@ -730,7 +730,8 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
         throw new TapException(e);
       }
     }
-    for (int i = 0; i < fields.size(); i++) {
+    int check = strict ? fields.size() : values.size() < fields.size() ? values.size() : fields.size();
+    for (int i = 0; i < check; i++) {
       int index = indices != null ? indices.get(fields.get(i).toString()) : i;
       Text value = values.get(index);
       if (value == null) {
