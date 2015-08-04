@@ -66,7 +66,6 @@ public class CsvSchemeTest {
   /**
    * Tests the CSV scheme source with headers.
    */
-  @Test
   private void testCsvSourceWithHeaders(String inputPath) throws Exception {
 
     String sinkPath = "src/test/resources/output/source-with-headers";
