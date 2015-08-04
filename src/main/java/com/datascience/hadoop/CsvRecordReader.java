@@ -76,7 +76,7 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
             String message = String.format("%s: %s", "inconsistent record at position", position);
             if (strict)
               throw new CsvParseException(message);
-//            return next(key, value);
+            return next(key, value);
           } catch(CsvParseException e) {
             throw new TapException(e);
           }

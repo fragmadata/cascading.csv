@@ -718,7 +718,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
         Long position = pos.get();
         String message = String.format("%s: %s", "Failed to parse record. fields not in header record at position: ", position);
         LOGGER.warn(message);
-        if (strict || !strict) {
+        if (strict) {
           throw new CsvParseException(message);
         } else {
           return true;
