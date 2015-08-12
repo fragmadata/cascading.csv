@@ -100,7 +100,6 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
             value.add(text);
           }
         }
-        //position = record.getCharacterPosition();
         return true;
       }
     } catch (Exception e) {
