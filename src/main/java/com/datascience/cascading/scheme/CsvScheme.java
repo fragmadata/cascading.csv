@@ -27,10 +27,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.Hfs;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.*;
 import com.datascience.hadoop.CsvInputFormat;
 import com.datascience.hadoop.CsvOutputFormat;
 import com.datascience.hadoop.ListWritable;
@@ -704,7 +701,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
 
   @Override
   @SuppressWarnings("unchecked")
-  public boolean source(FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall) throws IOException {
+  public boolean source(FlowProcess<JobConf> flowProcess, SourceCall<Object[], RecordReader> sourceCall) throws TapException, IOException {
     Object[] context = sourceCall.getContext();
     if (!sourceCall.getInput().next(context[0], context[1])) {
       return false;
@@ -730,13 +727,22 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
         throw new TapException(e);
       }
     }
-    for (int i = 0; i < fields.size(); i++) {
+    int check = strict ? fields.size() : values.size() != fields.size()  ? values.size() : fields.size();
+    for (int i = 0; i < check; i++) {
       int index = indices != null ? indices.get(fields.get(i).toString()) : i;
       Text value = values.get(index);
       if (value == null) {
         entry.setString(i, null);
       } else {
-        entry.setString(i, value.toString());
+        try {
+          entry.setString(i, value.toString());
+        } catch (Exception e) {
+          Tuple tuple = new Tuple();
+          for (Text val : values) {
+            tuple.addString(val.toString());
+          }
+          throw new TapException(e.getMessage(), e, tuple);
+        }
       }
     }
     return true;

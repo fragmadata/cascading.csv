@@ -49,8 +49,9 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   private final Iterator<CSVRecord> iterator;
   private final long length;
   private final boolean strict;
-  private long position;
+  private long position =0;
   private Integer colLength;
+
 
   public CsvRecordReader(Reader reader, CSVFormat format, long length, boolean strict) throws IOException {
     this.length = length;
@@ -70,6 +71,7 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
     try {
       if (iterator.hasNext()) {
         CSVRecord record = iterator.next();
+        position++;
         colLength = colLength == null ? record.size() : colLength;
         if (!record.isConsistent() || record.size() != colLength) {
           try {
@@ -98,7 +100,6 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
             value.add(text);
           }
         }
-        position = record.getCharacterPosition();
         return true;
       }
     } catch (Exception e) {

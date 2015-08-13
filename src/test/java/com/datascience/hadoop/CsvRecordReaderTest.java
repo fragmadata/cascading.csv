@@ -15,6 +15,8 @@
  */
 package com.datascience.hadoop;
 
+import cascading.tap.TapException;
+import com.datascience.util.CsvParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -81,6 +83,34 @@ public class CsvRecordReaderTest  {
     testForReadAllRecords("/input/skipped-lines.txt", 3, 3);
   }
 
+
+  @Test
+  public void readingExtraColumnsWhenNotStrict() throws IOException{
+
+    helper = new CsvHelper();
+    String[] columns = {"id", "first name", "last name","city","zip"};
+    conf= helper.buildConfiguration("\t", "true", "\n", columns);
+    conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
+    testForReadAllRecords("/input/with-extra-columns.txt", 5,5);
+  }
+
+  @Test(expected= TapException.class)
+  public void readingExtraColumnsWhenStrict() throws IOException{
+
+    helper = new CsvHelper();
+    String[] columns = {"id", "first name", "last name","city","zip"};
+    conf= helper.buildConfiguration("\t", "true", "\n", columns);
+    conf.setBoolean(CsvInputFormat.STRICT_MODE, true);
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
+    testForReadAllRecords("/input/with-extra-columns.txt", 5,5);
+  }
+
+
+
+
   @Test(expected=RuntimeException.class)
   public void readerShouldNotParseErrorRecords()throws IOException{
     conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
@@ -90,6 +120,8 @@ public class CsvRecordReaderTest  {
 
     testForReadAllRecords("/input/skipped-lines.txt", 3, 4);
   }
+
+
 
   /**
    * Helper function that iterates through Record Reader and assert values.
