@@ -52,7 +52,6 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
   private long position =0;
   private Integer colLength;
 
-
   public CsvRecordReader(Reader reader, CSVFormat format, long length, boolean strict) throws IOException {
     this.length = length;
     this.strict = strict;
@@ -75,9 +74,8 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
         colLength = colLength == null ? record.size() : colLength;
         if (!record.isConsistent() || record.size() != colLength) {
           try {
-            String message = String.format("%s: %s", "inconsistent record at position", position);
             if (strict)
-              throw new CsvParseException(message);
+              throw new CsvParseException(String.format("inconsistent record at position: %s", position));
             return next(key, value);
           } catch(CsvParseException e) {
             throw new TapException(e);
