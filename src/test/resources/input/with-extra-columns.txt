@@ -6,3 +6,4 @@ id	first name	last name	city	zip
 5	Tristan	Reid	San Fernando	9999
 6	Mark	McKelvy	El Segundo	99999
 7	Harrison	Cavarallo	LosAngeles	CA	90007	USA
+5	Tristan	Reid	San Fernando	9999

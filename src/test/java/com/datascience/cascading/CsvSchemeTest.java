@@ -554,7 +554,7 @@ public class CsvSchemeTest {
   @Test
   public void testWhenExtraColumnsNotStrict() throws Exception{
     String sourcePath = "src/test/resources/input/with-extra-columns.txt";
-    String sinkPath = "src/test/resources/input/sink-with-headers";
+    String sinkPath = "src/test/resources/input/sink-with-extra-columns";
     String expectedPath = "src/test/resources/expected/with-extra-columns-no-strict.txt";
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();

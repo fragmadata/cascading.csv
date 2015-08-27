@@ -72,15 +72,15 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
         CSVRecord record = iterator.next();
         position++;
         colLength = colLength == null ? record.size() : colLength;
-        if (!record.isConsistent() || record.size() != colLength) {
-          try {
-            if (strict)
-              throw new CsvParseException(String.format("inconsistent record at position: %s", position));
-            return next(key, value);
-          } catch(CsvParseException e) {
-            throw new TapException(e);
-          }
-        }
+//        if (!record.isConsistent() || record.size() != colLength) {
+//          try {
+//            if (strict)
+//              throw new CsvParseException(String.format("inconsistent record at position: %s", position));
+//            return next(key, value);
+//          } catch(CsvParseException e) {
+//            throw new TapException(e);
+//          }
+//        }
 
         key.set(record.getRecordNumber());
 

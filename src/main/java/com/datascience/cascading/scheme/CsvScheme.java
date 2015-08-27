@@ -548,7 +548,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     // CSV header names, assume the first record is a header and validate the provided field names against the header.
     // This will allow provided field names to be intersected with CSV columns based on names in the header record.
     else if (!fields.isUnknown() && format.getHeader() == null && format.getSkipHeaderRecord()) {
-      if (!validateFields(flowProcess, tap, fields)) {
+      if (strict && !validateFields(flowProcess, tap, fields)) {
         throw new RuntimeException("Fields passed not present in header");
       }
     }
@@ -556,14 +556,14 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
     // of provided fields matches the number of columns in the CSV file since we have no way of mapping field names
     // to column names.
     else if (!fields.isUnknown() && format.getHeader() == null) {
-      if (!doFieldsMatchColumns(flowProcess, tap, fields)) {
+      if (strict && !doFieldsMatchColumns(flowProcess, tap, fields)) {
         throw new RuntimeException("Fields count don't match header count");
       }
     }
     // If fields is unknown but the header is provided, validate that the number of columns in the header match the
     // number of columns in the CSV file and set the source fields as the provided header.
     else if (fields.isUnknown()) {
-      if (validateHeaders(flowProcess, tap)) {
+      if (!strict && validateHeaders(flowProcess, tap)) {
         setSourceFields(new Fields(format.getHeader()));
       } else {
         throw new RuntimeException("Headers count don't match column count in input file");
@@ -727,15 +727,39 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
         throw new TapException(e);
       }
     }
-    int check = strict ? fields.size() : values.size() != fields.size()  ? values.size() : fields.size();
-    for (int i = 0; i < check; i++) {
-      int index = indices != null ? indices.get(fields.get(i).toString()) : i;
-      Text value = values.get(index);
+    int check = strict ? fields.size() : values.size() > fields.size()  ? values.size() : fields.size();
+    int checkIndexDiff = check - indices.size();
+    if (checkIndexDiff > 0) {
+      String[] names = new String[checkIndexDiff];
+      String[] vals = new String[checkIndexDiff];
+      for (int i=0; i < checkIndexDiff; i++) {
+        names[i] = String.format("col%s", indices.size() + i);
+        vals[i] = getNullString();
+      }
+      Fields newFields = new Fields(names);
+      fields.append(newFields);
+      Tuple tuple = new Tuple(entry.getTuple());
+      TupleEntry newTe = new TupleEntry(fields, tuple);
+//      entry = entry.appendNew(new TupleEntry(newFields, new Tuple(vals)));
+//      fields = entry.getFields();
+
+      for (int i=indices.size()-1; i < values.size(); i++)
+        values.remove(i);
+    }
+    for (int i = 0; i < fields.size(); i++) {
+      int index = 0;
+      index = indices != null && checkIndexDiff <= 0 ? indices.get(fields.get(i).toString()) : i;
+
+      //fill empty values with null for records missing values
+      Text value = values.size() - i < 1 ? null : values.get(index);
       if (value == null) {
         entry.setString(i, null);
       } else {
         try {
+          TupleEntry te = new TupleEntry(entry.getFields(), entry.getTuple());
+          te.set(entry);
           entry.setString(i, value.toString());
+//          entry = te.appendNew(new TupleEntry(new Fields(i), new Tuple(i)));
         } catch (Exception e) {
           Tuple tuple = new Tuple();
           for (Text val : values) {
