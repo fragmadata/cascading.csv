@@ -21,9 +21,11 @@ import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
 import cascading.pipe.Pipe;
+import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
@@ -556,12 +558,14 @@ public class CsvSchemeTest {
     String sourcePath = "src/test/resources/input/with-extra-columns.txt";
     String sinkPath = "src/test/resources/input/sink-with-headers";
     String expectedPath = "src/test/resources/expected/with-extra-columns-no-strict.txt";
+    String trapPath = "src/test/resources/input/trap-sink-with-headers";
+    String expectedTrapPath = "src/test/resources/expected/trap-with-extra-columns-no-strict.txt";
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
       .withQuote('"')
-      .withHeader("id", "first name", "last name", "city", "zip")
-      .withEscape('\\')
+            .withHeader("id", "first name", "last name", "city", "zip")
+            .withEscape('\\')
       .withRecordSeparator('\n');
 
     CSVFormat sinkFormat = CSVFormat.newFormat('\t')
@@ -571,12 +575,14 @@ public class CsvSchemeTest {
 
     Tap source = new Hfs(new CsvScheme(sourceFormat,false), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
+    Tap trap = new Hfs(new TextDelimited(true, "\t"), trapPath, SinkMode.REPLACE);
 
     Pipe pipe = new Pipe("pipe");
 
-    connector.connect(source, sink, pipe).complete();
+    connector.connect("extra-columns-not-strict", source, sink, trap, pipe).complete();
 
     testPaths(sinkPath, expectedPath);
+    testPaths(trapPath, expectedTrapPath);
   }
 
   @Test(expected=FlowException.class)
@@ -607,7 +613,9 @@ public class CsvSchemeTest {
   public void testWhenExtraColumnsNotStrictNoHeaders() throws Exception{
     String sourcePath = "src/test/resources/input/with-extra-columns-no-header.txt";
     String sinkPath = "src/test/resources/input/sink-no-headers";
+    String trapPath = "src/test/resources/input/trap-no-headers";
     String expectedPath = "src/test/resources/expected/with-extra-columns-no-strict-no-header.txt";
+    String expectedTrapPath = "src/test/resources/expected/trap-with-extra-columns-no-strict-no-header.txt";
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
@@ -621,11 +629,13 @@ public class CsvSchemeTest {
 
     Tap source = new Hfs(new CsvScheme(sourceFormat,false), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
+    Tap trap = new Hfs(new TextDelimited(false, "\t"), trapPath, SinkMode.REPLACE);
 
     Pipe pipe = new Pipe("pipe");
 
-    connector.connect(source, sink, pipe).complete();
+    connector.connect("test-extra-columns-no-header", source, sink, trap, pipe).complete();
     testPaths(sinkPath, expectedPath);
+    testPaths(trapPath, expectedTrapPath);
   }
 
   @Test(expected=FlowException.class)
