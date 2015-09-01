@@ -741,7 +741,7 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
         try {
           entry.setString(i, value.toString());
         } catch (Exception e) {
-          if (strict) {
+          if (!strict) {
             Tuple tuple = new Tuple();
             for (Text val : values) {
               tuple.addString(val.toString());
