@@ -16,7 +16,6 @@
 package com.datascience.hadoop;
 
 import cascading.tap.TapException;
-import com.datascience.util.CsvParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,7 +31,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * CSV record reader tests.
@@ -71,6 +69,20 @@ public class CsvRecordReaderTest  {
     testForReadAllRecords("/input/with-headers.txt.gz", 3, 6);
   }
 
+  /**
+   * Test to check if records are skipped when strict mode is disabled.
+   */
+  @Test
+  public void readerShouldSkipErrorRecords() throws IOException{
+    conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
+    conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
+    jobConf = new JobConf(conf);
+    fs = FileSystem.get(conf);
+
+    testForReadAllRecords("/input/skipped-lines.txt", 3, 3);
+  }
+
+
   @Test
   public void readingExtraColumnsWhenNotStrict() throws IOException{
 
@@ -80,10 +92,10 @@ public class CsvRecordReaderTest  {
     conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
     jobConf = new JobConf(conf);
     fs = FileSystem.get(conf);
-    testForReadAllRecords("/input/with-extra-columns.txt", 7,7);
+    testForReadAllRecords("/input/with-extra-columns.txt", 5,5);
   }
 
-  @Test(expected= CsvParseException.class)
+  @Test(expected= TapException.class)
   public void readingExtraColumnsWhenStrict() throws IOException{
 
     helper = new CsvHelper();
@@ -126,14 +138,9 @@ public class CsvRecordReaderTest  {
 
     int actualRecordCount = 0;
 
-    long expectedKey = 0;
-
     while (createdReader.next(key, value)) {
       actualRecordCount++;
-
-      expectedKey++;
-
-      assertTrue((value.size() - expectedRowLength) < 1);
+      assertEquals(expectedRowLength, value.size());
     }
     assertEquals(expectedRecordCount, actualRecordCount);
   }

@@ -32,21 +32,6 @@ import java.net.URL;
  */
 public class CsvHelper {
 
-
-  public Configuration getDefaultConf(){
-    Configuration conf = new Configuration();
-    conf.set("fs.default.name", "file:///");
-    conf.set(CsvInputFormat.CSV_READER_DELIMITER, ",");
-    conf.set(CsvInputFormat.CSV_READER_SKIP_HEADER, "true");
-    conf.set(CsvInputFormat.CSV_READER_RECORD_SEPARATOR, "\n");
-    conf.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
-    conf.set("io.compression.codecs", "org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.DeflateCodec,org.apache.hadoop.io.compress.SnappyCodec,org.apache.hadoop.io.compress.Lz4Codec");
-    conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
-    conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
-   return conf;
-
-  }
-
   public Configuration buildConfiguration(String delimiter, String skipHeader, String recordSeparator, String[] columns){
      Configuration conf = new Configuration();
     conf.set("fs.default.name", "file:///");
@@ -68,17 +53,13 @@ public class CsvHelper {
     return new File(url.getFile());
   }
 
-
   public RecordReader createRecordReader(InputFormat format, InputSplit split, JobConf jobConf) throws IOException {
     Reporter reporter = Reporter.NULL;
     return format.getRecordReader(split, jobConf, reporter);
   }
 
   public FileSplit createFileSplit(Path path, long start, long end) {
-
     return new FileSplit(path, start, end, new String[0]);
-
   }
-
 
 }
