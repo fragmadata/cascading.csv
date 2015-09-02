@@ -16,6 +16,7 @@
 package com.datascience.hadoop;
 
 import cascading.tap.TapException;
+import com.datascience.util.CsvParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -69,20 +70,6 @@ public class CsvRecordReaderTest  {
     testForReadAllRecords("/input/with-headers.txt.gz", 3, 6);
   }
 
-  /**
-   * Test to check if records are skipped when strict mode is disabled.
-   */
-  @Test
-  public void readerShouldSkipErrorRecords() throws IOException{
-    conf.set(CsvInputFormat.CSV_READER_QUOTE_CHARACTER,"\"");
-    conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
-    jobConf = new JobConf(conf);
-    fs = FileSystem.get(conf);
-
-    testForReadAllRecords("/input/skipped-lines.txt", 3, 3);
-  }
-
-
   @Test
   public void readingExtraColumnsWhenNotStrict() throws IOException{
 
@@ -92,10 +79,10 @@ public class CsvRecordReaderTest  {
     conf.setBoolean(CsvInputFormat.STRICT_MODE, false);
     jobConf = new JobConf(conf);
     fs = FileSystem.get(conf);
-    testForReadAllRecords("/input/with-extra-columns.txt", 5,5);
+    testForReadAllRecordsNotStrict("/input/with-extra-columns.txt", 7);
   }
 
-  @Test(expected= TapException.class)
+  @Test(expected= CsvParseException.class)
   public void readingExtraColumnsWhenStrict() throws IOException{
 
     helper = new CsvHelper();
@@ -123,7 +110,7 @@ public class CsvRecordReaderTest  {
 
 
   /**
-   * Helper function that iterates through Record Reader and assert values.
+   * Helper function that iterates through Record Reader and assert record RecordCount and RecordLength.
    */
   public void testForReadAllRecords(String fileName, int expectedRowLength, int expectedRecordCount) throws IOException {
     CsvInputFormat inputFormat = helper.createCSVInputFormat(conf);
@@ -145,5 +132,26 @@ public class CsvRecordReaderTest  {
     assertEquals(expectedRecordCount, actualRecordCount);
   }
 
+  /**
+   * Helper function that iterates through Recrord Reader and asserts RecrordCount
+   */
+  public void testForReadAllRecordsNotStrict(String fileName, int expectedRecordCount) throws IOException {
+    CsvInputFormat inputFormat = helper.createCSVInputFormat(conf);
+    File inputFile = helper.getFile(fileName);
+    Path inputPath = new Path(inputFile.getAbsoluteFile().toURI().toString());
+    FileSplit split = helper.createFileSplit(inputPath, 0, inputFile.length());
+
+    RecordReader createdReader = helper.createRecordReader(inputFormat, split, jobConf);
+
+    LongWritable key = new LongWritable();
+    ListWritable<Text> value = new ListWritable<Text>(Text.class);
+
+    int actualRecordCount = 0;
+
+    while (createdReader.next(key, value)) {
+      actualRecordCount++;
+    }
+    assertEquals(expectedRecordCount, actualRecordCount);
+  }
 
 }
