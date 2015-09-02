@@ -35,7 +35,6 @@ import static org.junit.Assert.assertTrue;
  * @author amareeshbasanapalli
  */
 public class CsvOutputFormatTest  {
-
   Configuration conf;
   CsvHelper helper;
   JobConf jobConf;
@@ -47,7 +46,6 @@ public class CsvOutputFormatTest  {
     helper = new CsvHelper();
     String[] columns = {"id", "first name", "last name"};
    conf= helper.buildConfiguration(",", "true", "\n", columns);
-
   }
 
   /**
@@ -60,7 +58,6 @@ public class CsvOutputFormatTest  {
     conf.set("mapreduce.task.attempt.id", "attempt_200707121733_0003_m_00005_0");
     jobConf = new JobConf(conf);
     fs = FileSystem.get(conf);
-
 
     CsvOutputFormat format = ReflectionUtils.newInstance(CsvOutputFormat.class, conf);
     assertTrue(format.getRecordWriter(fs, jobConf, "output", null) instanceof CsvRecordWriter);
@@ -76,7 +73,6 @@ public class CsvOutputFormatTest  {
     conf.set("mapreduce.task.attempt.id", "attempt_200707121733_0003_m_00005_0");
     jobConf = new JobConf(conf);
     fs = FileSystem.get(conf);
-
 
     CsvOutputFormat format = ReflectionUtils.newInstance(CsvOutputFormat.class, conf);
     assertTrue(format.getRecordWriter(fs, jobConf, "output", null) instanceof CsvRecordWriter);

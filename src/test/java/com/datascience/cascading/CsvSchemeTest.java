@@ -21,9 +21,11 @@ import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
 import cascading.pipe.Pipe;
+import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
@@ -294,7 +296,7 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    CsvScheme sourceScheme= new CsvScheme(sourceFormat);
+    CsvScheme sourceScheme = new CsvScheme(sourceFormat);
     CsvScheme sinkScheme = new CsvScheme(sinkFormat);
 
     testSchemeFields(sourcePath, sourceScheme, sinkPath, sinkScheme, expected);
@@ -324,7 +326,7 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    CsvScheme sourceScheme= new CsvScheme(sourceFormat);
+    CsvScheme sourceScheme = new CsvScheme(sourceFormat);
     CsvScheme sinkScheme = new CsvScheme(sinkFormat);
 
     testSchemeFields(sourcePath, sourceScheme, sinkPath, sinkScheme, expected);
@@ -335,7 +337,7 @@ public class CsvSchemeTest {
    * Test CsvScheme generating Headers when header is defined in source format.
    */
   @Test
-  public void schemeGenerateFieldsWhenSourceFormatHeaderGiven(){
+  public void schemeGenerateFieldsWhenSourceFormatHeaderGiven() {
 
     String sourcePath = "src/test/resources/input/without-headers.txt";
     String sinkPath = "src/test/resources/output/sink-without-headers";
@@ -355,7 +357,7 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    CsvScheme sourceScheme= new CsvScheme(sourceFormat);
+    CsvScheme sourceScheme = new CsvScheme(sourceFormat);
     CsvScheme sinkScheme = new CsvScheme(sinkFormat);
 
     testSchemeFields(sourcePath, sourceScheme, sinkPath, sinkScheme, expected);
@@ -366,7 +368,7 @@ public class CsvSchemeTest {
    * Test CsvScheme Generating headers when Source Fields are provided.
    */
   @Test
-  public void schemeGenerateFieldsWhenSourceFieldsGiven(){
+  public void schemeGenerateFieldsWhenSourceFieldsGiven() {
 
     String sourcePath = "src/test/resources/input/with-headers.txt";
     String sinkPath = "src/test/resources/output/sink-without-headers";
@@ -387,7 +389,7 @@ public class CsvSchemeTest {
 
     Fields sourceFields = new Fields("id", "first name", "last name");
 
-    CsvScheme sourceScheme= new CsvScheme(sourceFields, sourceFormat);
+    CsvScheme sourceScheme = new CsvScheme(sourceFields, sourceFormat);
     CsvScheme sinkScheme = new CsvScheme(sinkFormat);
 
     testSchemeFields(sourcePath, sourceScheme, sinkPath, sinkScheme, expected);
@@ -398,7 +400,7 @@ public class CsvSchemeTest {
    * Test CsvScheme Generating headers when both Source Fields and Headers are provided.
    */
   @Test
-  public void schemeGeneratingHeadersWhenSourceHeadersAndFieldsAreGiven(){
+  public void schemeGeneratingHeadersWhenSourceHeadersAndFieldsAreGiven() {
 
     String sourcePath = "src/test/resources/input/without-headers.txt";
     String sinkPath = "src/test/resources/output/sink-without-headers";
@@ -418,9 +420,9 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    Fields sourceFields = new Fields("id", "first name","last name");
+    Fields sourceFields = new Fields("id", "first name", "last name");
 
-    CsvScheme sourceScheme= new CsvScheme(sourceFields, sourceFormat);
+    CsvScheme sourceScheme = new CsvScheme(sourceFields, sourceFormat);
     CsvScheme sinkScheme = new CsvScheme(sinkFormat);
 
     testSchemeFields(sourcePath, sourceScheme, sinkPath, sinkScheme, expected);
@@ -431,7 +433,7 @@ public class CsvSchemeTest {
    * Tests if correct number of input headers are provided.
    */
   @Test(expected = RuntimeException.class)
-  public void headerCountMismatchColumnsTest(){
+  public void headerCountMismatchColumnsTest() {
 
     String sourcePath = "src/test/resources/input/with-headers.txt";
     String sinkPath = "src/test/resources/output/sink-with-headers";
@@ -449,7 +451,7 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    Tap source = new Hfs(new CsvScheme( sourceFormat), sourcePath);
+    Tap source = new Hfs(new CsvScheme(sourceFormat), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
     Pipe pipe = new Pipe("pipe");
 
@@ -460,8 +462,8 @@ public class CsvSchemeTest {
   /**
    * Tests if correct number of input fields are provided.
    */
-  @Test(expected=RuntimeException.class)
-  public void fieldsCountGreaterThanColumnsTest(){
+  @Test(expected = RuntimeException.class)
+  public void fieldsCountGreaterThanColumnsTest() {
 
     String sourcePath = "src/test/resources/input/with-headers.txt";
     String sinkPath = "src/test/resources/output/sink-with-headers";
@@ -477,7 +479,7 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    Fields sourceFields = new Fields("id", "last name", "first name","phone");
+    Fields sourceFields = new Fields("id", "last name", "first name", "phone");
     Tap source = new Hfs(new CsvScheme(sourceFields, sourceFormat), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
     Pipe pipe = new Pipe("pipe");
@@ -498,15 +500,15 @@ public class CsvSchemeTest {
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat(',')
-            .withHeader("id","first name", "last name")
-            .withQuote('"')
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withHeader("id", "first name", "last name")
+      .withQuote('"')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
     CSVFormat sinkFormat = CSVFormat.newFormat('\t')
-            .withSkipHeaderRecord()
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withSkipHeaderRecord()
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
     Fields sourceFields = new Fields("id");
     Tap source = new Hfs(new CsvScheme(sourceFields, sourceFormat), sourcePath);
@@ -520,7 +522,7 @@ public class CsvSchemeTest {
   }
 
   @Test
-  public void testWhenFieldsAndHeadersAreinDifferentOrder() throws Exception{
+  public void testWhenFieldsAndHeadersAreinDifferentOrder() throws Exception {
 
     String sourcePath = "src/test/resources/input/with-headers.txt";
     String sinkPath = "src/test/resources/output/sink-with-headers";
@@ -538,9 +540,9 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    Fields sourceFields = new Fields("id","last name", "first name");
+    Fields sourceFields = new Fields("id", "last name", "first name");
 
-    Tap source = new Hfs(new CsvScheme(sourceFields,sourceFormat), sourcePath);
+    Tap source = new Hfs(new CsvScheme(sourceFields, sourceFormat), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath);
 
     Pipe pipe = new Pipe("pipe");
@@ -552,10 +554,12 @@ public class CsvSchemeTest {
   }
 
   @Test
-  public void testWhenExtraColumnsNotStrict() throws Exception{
+  public void testWhenExtraColumnsNotStrict() throws Exception {
     String sourcePath = "src/test/resources/input/with-extra-columns.txt";
     String sinkPath = "src/test/resources/input/sink-with-headers";
     String expectedPath = "src/test/resources/expected/with-extra-columns-no-strict.txt";
+    String trapPath = "src/test/resources/input/trap-sink-with-headers";
+    String expectedTrapPath = "src/test/resources/expected/trap-with-extra-columns-no-strict.txt";
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
@@ -569,33 +573,35 @@ public class CsvSchemeTest {
       .withEscape('\\')
       .withRecordSeparator('\n');
 
-    Tap source = new Hfs(new CsvScheme(sourceFormat,false), sourcePath);
+    Tap source = new Hfs(new CsvScheme(sourceFormat, false), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
+    Tap trap = new Hfs(new TextDelimited(true, "\t"), trapPath, SinkMode.REPLACE);
 
     Pipe pipe = new Pipe("pipe");
 
-    connector.connect(source, sink, pipe).complete();
+    connector.connect("extra-columns-not-strict", source, sink, trap, pipe).complete();
 
     testPaths(sinkPath, expectedPath);
+    testPaths(trapPath, expectedTrapPath);
   }
 
-  @Test(expected=FlowException.class)
-  public void testWhenExtraColumnsStrict() throws Exception{
+  @Test(expected = FlowException.class)
+  public void testWhenExtraColumnsStrict() throws Exception {
     String sourcePath = "src/test/resources/input/with-extra-columns.txt";
     String sinkPath = "src/test/resources/input/sink-with-headers";
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
-            .withHeader("id", "first name", "last name", "city", "zip")
-            .withQuote('"')
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withHeader("id", "first name", "last name", "city", "zip")
+      .withQuote('"')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
     CSVFormat sinkFormat = CSVFormat.newFormat('\t')
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
-    Tap source = new Hfs(new CsvScheme(sourceFormat,true), sourcePath);
+    Tap source = new Hfs(new CsvScheme(sourceFormat, true), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
 
     Pipe pipe = new Pipe("pipe");
@@ -604,46 +610,50 @@ public class CsvSchemeTest {
   }
 
   @Test
-  public void testWhenExtraColumnsNotStrictNoHeaders() throws Exception{
+  public void testWhenExtraColumnsNotStrictNoHeaders() throws Exception {
     String sourcePath = "src/test/resources/input/with-extra-columns-no-header.txt";
     String sinkPath = "src/test/resources/input/sink-no-headers";
+    String trapPath = "src/test/resources/input/trap-no-headers";
     String expectedPath = "src/test/resources/expected/with-extra-columns-no-strict-no-header.txt";
+    String expectedTrapPath = "src/test/resources/expected/trap-with-extra-columns-no-strict-no-header.txt";
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
-            .withQuote('"')
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withQuote('"')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
     CSVFormat sinkFormat = CSVFormat.newFormat('\t')
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
-    Tap source = new Hfs(new CsvScheme(sourceFormat,false), sourcePath);
+    Tap source = new Hfs(new CsvScheme(sourceFormat, false), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
+    Tap trap = new Hfs(new TextDelimited(false, "\t"), trapPath, SinkMode.REPLACE);
 
     Pipe pipe = new Pipe("pipe");
 
-    connector.connect(source, sink, pipe).complete();
+    connector.connect("test-extra-columns-no-header", source, sink, trap, pipe).complete();
     testPaths(sinkPath, expectedPath);
+    testPaths(trapPath, expectedTrapPath);
   }
 
-  @Test(expected=FlowException.class)
-  public void testWhenExtraColumnsStrictNoHeaders() throws Exception{
+  @Test(expected = FlowException.class)
+  public void testWhenExtraColumnsStrictNoHeaders() throws Exception {
     String sourcePath = "src/test/resources/input/with-extra-columns-no-header.txt";
     String sinkPath = "src/test/resources/input/sink-no-headers";
 
     FlowConnector connector = new Hadoop2MR1FlowConnector();
     CSVFormat sourceFormat = CSVFormat.newFormat('\t')
-            .withQuote('"')
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withQuote('"')
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
     CSVFormat sinkFormat = CSVFormat.newFormat('\t')
-            .withEscape('\\')
-            .withRecordSeparator('\n');
+      .withEscape('\\')
+      .withRecordSeparator('\n');
 
-    Tap source = new Hfs(new CsvScheme(sourceFormat,true), sourcePath);
+    Tap source = new Hfs(new CsvScheme(sourceFormat, true), sourcePath);
     Tap sink = new Hfs(new CsvScheme(sinkFormat), sinkPath, SinkMode.REPLACE);
 
     Pipe pipe = new Pipe("pipe");
@@ -655,7 +665,7 @@ public class CsvSchemeTest {
    * Helper method used for assertion of fields generated by CsvScheme.
    */
   @SuppressWarnings("unchecked")
-  private void testSchemeFields(String sourcePath, CsvScheme sourceSchema, String sinkPath,  CsvScheme sinkScheme, Set<String>expected){
+  private void testSchemeFields(String sourcePath, CsvScheme sourceSchema, String sinkPath, CsvScheme sinkScheme, Set<String> expected) {
 
     Tap source = new Hfs(sourceSchema, sourcePath);
     Tap sink = new Hfs(sinkScheme, sinkPath);
@@ -666,11 +676,11 @@ public class CsvSchemeTest {
 
     Fields sinkFields = sink.getSinkFields();
     for (int i = 0; i < sinkFields.size(); i++) {
-      assertTrue("Unexpected column "+sinkFields.get(i),expected.contains(sinkFields.get(i)));
+      assertTrue("Unexpected column " + sinkFields.get(i), expected.contains(sinkFields.get(i)));
       expected.remove(sinkFields.get(i));
     }
 
-    assertTrue("Not all expected values are found",expected.isEmpty());
+    assertTrue("Not all expected values are found", expected.isEmpty());
 
   }
 

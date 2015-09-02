@@ -16,6 +16,7 @@
 package com.datascience.hadoop;
 
 import cascading.tap.TapException;
+import cascading.tuple.Tuple;
 import com.datascience.util.CsvParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -72,14 +73,9 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
         CSVRecord record = iterator.next();
         position++;
         colLength = colLength == null ? record.size() : colLength;
-        if (!record.isConsistent() || record.size() != colLength) {
-          try {
-            if (strict)
-              throw new CsvParseException(String.format("inconsistent record at position: %s", position));
-            return next(key, value);
-          } catch(CsvParseException e) {
-            throw new TapException(e);
-          }
+        if ((!record.isConsistent() || record.size() != colLength) && strict) {
+          String message = String.format("%s: %s", "inconsistent record at position", position);
+          throw new CsvParseException(message);
         }
 
         key.set(record.getRecordNumber());
@@ -98,8 +94,10 @@ public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<
             value.add(text);
           }
         }
+        //position = record.getCharacterPosition();
         return true;
       }
+
     } catch (Exception e) {
       LOGGER.warn("failed to parse record at position: " + position);
       if (strict) {

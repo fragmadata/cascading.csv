@@ -16,7 +16,6 @@
 package com.datascience.hadoop;
 
 import cascading.tap.TapException;
-import com.datascience.util.CsvParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -139,13 +138,8 @@ public class CsvRecordReaderTest  {
 
     int actualRecordCount = 0;
 
-    long expectedKey = 0;
-
     while (createdReader.next(key, value)) {
       actualRecordCount++;
-
-      expectedKey++;
-
       assertEquals(expectedRowLength, value.size());
     }
     assertEquals(expectedRecordCount, actualRecordCount);

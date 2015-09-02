@@ -36,7 +36,6 @@ import static org.junit.Assert.assertTrue;
  * @author amareeshbasanapalli
  */
 public class CsvInputFormatTest {
-
   CsvHelper helper;
   Configuration conf;
   JobConf jobConf;

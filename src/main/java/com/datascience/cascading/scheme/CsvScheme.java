@@ -728,20 +728,28 @@ public class CsvScheme extends Scheme<JobConf, RecordReader, OutputCollector, Ob
       }
     }
     int check = strict ? fields.size() : values.size() != fields.size()  ? values.size() : fields.size();
-    for (int i = 0; i < check; i++) {
-      int index = indices != null ? indices.get(fields.get(i).toString()) : i;
-      Text value = values.get(index);
+    int checkDiff = check - fields.size();
+    for (int i = 0; i < (checkDiff < 1? fields.size() : values.size()); i++) {
+      int index = indices != null && checkDiff < 1? indices.get(fields.get(i).toString()) : i;
+
+      //fill empty values with null for records missing values
+      Text value = values.size() - i < 1 ? null : values.get(index);
+
       if (value == null) {
         entry.setString(i, null);
       } else {
         try {
           entry.setString(i, value.toString());
         } catch (Exception e) {
-          Tuple tuple = new Tuple();
-          for (Text val : values) {
-            tuple.addString(val.toString());
+          if (!strict) {
+            Tuple tuple = new Tuple();
+            for (Text val : values) {
+              tuple.addString(val.toString());
+            }
+            throw new TapException(e.getMessage(), e, tuple);
+          } else {
+            return false;
           }
-          throw new TapException(e.getMessage(), e, tuple);
         }
       }
     }
