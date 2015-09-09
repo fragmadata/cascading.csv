@@ -24,7 +24,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.RecordReader;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -44,7 +45,7 @@ import java.util.Iterator;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class CsvRecordReader implements RecordReader<LongWritable, ListWritable<Text>> {
-  private static final Logger LOGGER = Logger.getLogger(CsvRecordReader.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CsvRecordReader.class);
   private final Text[] cache = new Text[1024];
   private final CSVParser parser;
   private final Iterator<CSVRecord> iterator;
